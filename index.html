@@ -78,12 +78,13 @@
 <body>
 <div id="app">
   <header>
-    <div>🧱 Craft English Adventure <span style="font-size:11px;opacity:0.7;">完整版 v1.1</span></div>
+    <div>🧱 Craft English Adventure <span style="font-size:11px;opacity:0.7;">完整版 v1.2</span></div>
     <div id="hud">
       <span>👤 <span id="hud-name">小勇者</span></span>
       <span>🎖️ <span id="hud-level">Lv.1</span> <span id="hud-title">見習礦工</span></span>
       <span>💎 <span id="hud-xp">0</span> XP</span>
       <span>🔥 <span id="hud-streak">0</span></span>
+      <span id="music-toggle" onclick="toggleMusic()" style="cursor:pointer;font-size:18px;">🔊</span>
     </div>
   </header>
   <div id="main">
@@ -374,6 +375,8 @@ function saveState(){ localStorage.setItem('craftEnglishStateHK2', JSON.stringif
 function loadState(){ const raw = localStorage.getItem('craftEnglishStateHK2'); return raw ? JSON.parse(raw) : null; }
 
 function startGame(){
+  ensureMusicCtx();
+  if(!musicPlaying) startMusicLoop('menu');
   const inputName = document.getElementById('player-name').value.trim() || "小勇者";
   let existing = loadState();
   state = (existing && existing.name === inputName) ? existing : defaultState(inputName);
@@ -440,6 +443,7 @@ function enterChallenge(modeKey){
   currentMode = modeKey;
   questionQueue = [];
   questionQueueKey = null;
+  switchMusicTrack('game');
   const m = MODES[modeKey];
   totalTime = m.time;
   timeLeft = m.time;
@@ -457,7 +461,10 @@ function startTimer(){
   updateTimerBar();
   timerInterval = setInterval(()=>{
     timeLeft -= 0.1;
-    if(timeLeft <= 8) document.getElementById('timer-outer').classList.add('urgent');
+    if(timeLeft <= 8){
+      document.getElementById('timer-outer').classList.add('urgent');
+      if(currentMusicTrack !== 'urgent') switchMusicTrack('urgent');
+    }
     if(timeLeft <= 0){ timeLeft = 0; clearInterval(timerInterval); updateTimerBar(); endChallenge(true); return; }
     updateTimerBar();
   }, 100);
@@ -510,6 +517,70 @@ function nextQuestion(){
     optsGrid.appendChild(b);
   });
   document.getElementById('combo-display').innerText = comboCount > 1 ? `🔥 連擊 x${comboCount}!` : '';
+}
+
+
+/* ============ BACKGROUND MUSIC ENGINE (procedural 8-bit style) ============ */
+let musicCtx = null;
+let musicPlaying = false;
+let musicMuted = false;
+let musicTimer = null;
+let currentMusicTrack = 'menu';
+
+const MUSIC_PATTERNS = {
+  menu: [523.25,0,659.25,0,783.99,0,659.25,0, 523.25,0,659.25,0,523.25,0,0,0],
+  game: [392.00,523.25,392.00,523.25, 440.00,587.33,440.00,587.33, 349.23,440.00,349.23,440.00, 392.00,523.25,392.00,0],
+  urgent: [523.25,659.25,523.25,659.25, 587.33,698.46,587.33,698.46, 523.25,659.25,523.25,659.25, 493.88,587.33,493.88,587.33],
+  result: [659.25,0,523.25,0,392.00,0,523.25,0, 659.25,0,783.99,0,659.25,0,0,0]
+};
+const NOTE_DURATION = 0.18;
+
+function ensureMusicCtx(){
+  if(!musicCtx){
+    musicCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(musicCtx.state === 'suspended') musicCtx.resume();
+}
+
+function playMusicStep(freq){
+  if(musicMuted || !freq) return;
+  const osc = musicCtx.createOscillator();
+  const gain = musicCtx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0.06, musicCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, musicCtx.currentTime + NOTE_DURATION);
+  osc.connect(gain);
+  gain.connect(musicCtx.destination);
+  osc.start();
+  osc.stop(musicCtx.currentTime + NOTE_DURATION);
+}
+
+function startMusicLoop(trackName){
+  ensureMusicCtx();
+  currentMusicTrack = trackName;
+  clearInterval(musicTimer);
+  let step = 0;
+  const pattern = MUSIC_PATTERNS[trackName] || MUSIC_PATTERNS.menu;
+  musicTimer = setInterval(() => {
+    if(!musicMuted){
+      playMusicStep(pattern[step % pattern.length]);
+    }
+    step++;
+  }, NOTE_DURATION * 1000);
+  musicPlaying = true;
+}
+
+function switchMusicTrack(trackName){
+  if(currentMusicTrack !== trackName){
+    startMusicLoop(trackName);
+  }
+}
+
+function toggleMusic(){
+  musicMuted = !musicMuted;
+  document.getElementById('music-toggle').innerText = musicMuted ? '🔇' : '🔊';
+  if(!musicMuted) ensureMusicCtx();
 }
 
 function playTone(freq, duration){
@@ -577,7 +648,8 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if(id === 'screen-report') renderReport();
-  if(id === 'screen-levels') renderLevelGrid();
+  if(id === 'screen-levels'){ renderLevelGrid(); switchMusicTrack('menu'); }
+  if(id === 'screen-result'){ switchMusicTrack('result'); }
 }
 function renderReport(){
   const table = document.getElementById('report-table');
