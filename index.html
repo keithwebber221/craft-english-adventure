@@ -74,6 +74,7 @@ footer { text-align: center; font-size: 10px; opacity: 0.6; padding: 10px; }
       <span>🔥 <span id="hud-streak">0</span></span>
       <span id="music-toggle" onclick="toggleMusic()" style="cursor:pointer;font-size:18px;">🔊</span>
       <span onclick="openVolumePanel()" style="cursor:pointer;font-size:16px;">🎚️</span>
+      <span onclick="openParentGate()" style="cursor:pointer;font-size:16px;" title="家長專區">👨‍👩‍👧 <span id="reminder-badge" style="display:none;background:#e74c3c;border-radius:50%;padding:1px 5px;font-size:10px;">!</span></span>
     </div>
   </header>
   <div id="main">
@@ -92,6 +93,7 @@ footer { text-align: center; font-size: 10px; opacity: 0.6; padding: 10px; }
     <div class="screen" id="screen-categories">
       <div class="card">
         <h2 style="color:#ffd76a;">選擇礦洞類別</h2>
+        <div id="due-reminder-banner" style="display:none;background:rgba(231,76,60,0.2);border:2px solid #e74c3c;border-radius:6px;padding:10px;margin-bottom:10px;font-size:13px;"></div>
         <div id="player-level-panel" style="background:rgba(255,255,255,0.1);padding:10px;margin-bottom:10px;border:2px solid #ffd76a;">
           <div style="font-size:16px;">🎖️ 玩家等級：<span id="panel-level">Lv.1</span> - <span id="panel-title">見習礦工</span></div>
           <div class="progress-bar-outer" style="margin-top:6px;"><div class="progress-bar-inner" id="panel-xp-bar" style="background:#4ac9e0;"></div></div>
@@ -100,6 +102,103 @@ footer { text-align: center; font-size: 10px; opacity: 0.6; padding: 10px; }
         <div class="mode-grid" id="category-grid"></div>
         <br>
         <button class="block-btn diamond" onclick="showScreen('screen-report')">📊 查看學習報告</button>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-parent-gate">
+      <div class="card">
+        <h2 style="color:#ffd76a;">👨‍👩‍👧 家長專區</h2>
+        <p style="font-size:13px;opacity:0.85;">請輸入家長密碼（PIN）以進入覆習安排及詳細學習報告。</p>
+        <input id="parent-pin-input" type="password" inputmode="numeric" placeholder="輸入4位數密碼" maxlength="4">
+        <br><br>
+        <button class="block-btn grass" onclick="checkParentPin()">🔓 進入</button>
+        <br>
+        <p id="parent-pin-error" style="color:#e74c3c;font-size:12px;min-height:16px;"></p>
+        <small style="opacity:0.6;">預設密碼：1234（可於家長專區內更改）</small>
+        <br><br>
+        <button class="block-btn stone" onclick="showScreen('screen-categories')">⬅️ 返回</button>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-parent-dashboard">
+      <div class="card">
+        <h2 style="color:#ffd76a;">👨‍👩‍👧 家長跟進中心</h2>
+        <p style="font-size:12px;opacity:0.85;">全面追蹤孩子的學習活動、弱點及知識保留程度。</p>
+
+        <div style="text-align:left;margin-top:10px;">
+          <h3 style="color:#4ac9e0;font-size:14px;">🔥 本週學習活動 Weekly Activity</h3>
+          <div id="activity-calendar" style="display:flex;gap:4px;justify-content:space-between;"></div>
+          <div style="font-size:11px;opacity:0.7;margin-top:4px;">格子越亮代表當日學習量越多</div>
+        </div>
+
+        <div style="text-align:left;margin-top:16px;">
+          <h3 style="color:#4ac9e0;font-size:14px;">🎯 本週XP目標 Weekly Goal</h3>
+          <div class="progress-bar-outer"><div class="progress-bar-inner" id="weekly-goal-bar" style="background:#5c9e31;"></div></div>
+          <div style="font-size:12px;margin-top:4px;" id="weekly-goal-text"></div>
+          <div class="slider-row" style="margin-top:6px;">
+            <span style="width:90px;text-align:left;font-size:12px;">目標調整:</span>
+            <input type="range" min="50" max="1000" step="50" id="weekly-goal-slider" oninput="updateWeeklyGoal()">
+            <span id="weekly-goal-value" style="font-size:12px;width:50px;"></span>
+          </div>
+        </div>
+
+        <div style="text-align:left;margin-top:16px;">
+          <h3 style="color:#4ac9e0;font-size:14px;">📊 各礦洞掌握程度 Category Mastery</h3>
+          <div id="category-mastery-bars"></div>
+        </div>
+
+        <div style="text-align:left;margin-top:16px;">
+          <h3 style="color:#4ac9e0;font-size:14px;">⚠️ 弱點分析 Weak Topics</h3>
+          <div id="weak-topics-list" style="font-size:12px;"></div>
+        </div>
+
+        <div style="text-align:left;margin-top:16px;">
+          <h3 style="color:#4ac9e0;font-size:14px;">📅 待覆習清單 Pending Retests</h3>
+          <div id="pending-retest-list" style="font-size:12px;"></div>
+        </div>
+
+        <div style="text-align:left;margin-top:16px;">
+          <h3 style="color:#4ac9e0;font-size:14px;">✅ 已完成單元 · 可安排覆習</h3>
+          <div id="completed-unit-list" style="font-size:12px;"></div>
+        </div>
+
+        <div style="text-align:left;margin-top:16px;">
+          <h3 style="color:#4ac9e0;font-size:14px;">📈 挑戰歷史記錄 Challenge History</h3>
+          <table class="report" id="retest-history-table"></table>
+        </div>
+
+        <br>
+        <button class="block-btn diamond" onclick="exportReportCSV()">💾 匯出報告 (CSV)</button>
+        <button class="block-btn" onclick="openChangePin()">🔑 更改密碼</button>
+        <button class="block-btn stone" onclick="showScreen('screen-categories')">⬅️ 返回</button>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-change-pin">
+      <div class="card">
+        <h2 style="color:#ffd76a;">🔑 更改家長密碼</h2>
+        <input id="new-pin-input" type="password" inputmode="numeric" placeholder="輸入新4位數密碼" maxlength="4">
+        <br><br>
+        <button class="block-btn grass" onclick="saveNewPin()">✅ 儲存</button>
+        <br>
+        <p id="new-pin-error" style="color:#e74c3c;font-size:12px;min-height:16px;"></p>
+        <button class="block-btn stone" onclick="showScreen('screen-parent-dashboard')">⬅️ 返回</button>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-schedule-retest">
+      <div class="card">
+        <h2 style="color:#ffd76a;">⏰ 安排覆習時間</h2>
+        <p style="font-size:13px;" id="schedule-unit-name"></p>
+        <div class="mode-grid">
+          <button class="block-btn grass" onclick="scheduleRetest(1)">📅 明天覆習</button>
+          <button class="block-btn grass" onclick="scheduleRetest(3)">📅 3天後覆習</button>
+          <button class="block-btn grass" onclick="scheduleRetest(7)">📅 1星期後覆習</button>
+          <button class="block-btn grass" onclick="scheduleRetest(14)">📅 2星期後覆習</button>
+          <button class="block-btn diamond" onclick="scheduleRetest(0)">⚡ 立即測試</button>
+        </div>
+        <br>
+        <button class="block-btn stone" onclick="showScreen('screen-parent-dashboard')">⬅️ 返回</button>
       </div>
     </div>
 
@@ -291,19 +390,40 @@ let totalTime = 30;
 let comboCount = 0;
 let sessionCorrect = 0, sessionAttempts = 0, sessionXP = 0;
 let questionQueue = [];
+let isRetest = false;
+let parentUnlocked = false;
+let retestTargetUnit = null;
+let retestTargetCategory = null;
 
 function defaultState(name){
   const progress = {};
   Object.keys(CATEGORY_META).forEach(cat=>{
     progress[cat] = {};
     CATEGORY_META[cat].units.forEach((u,idx)=>{
-      progress[cat][u.id] = { unlocked: idx===0, completed:false, bestScore:0, totalCorrect:0, totalAttempts:0, stars:0 };
+      progress[cat][u.id] = { unlocked: idx===0, completed:false, bestScore:0, totalCorrect:0, totalAttempts:0, stars:0, history: [] };
     });
   });
-  return { name, xp:0, streak:0, progress, volume: { melody:0.05, bass:0.07, chords:0.025 } };
+  return { name, xp:0, streak:0, progress, volume: { melody:0.05, bass:0.07, chords:0.025 }, parentPin: '1234', reminders: [], activityLog: {}, weeklyGoalXP: 200, errorLog: {} };
 }
 function saveState(){ localStorage.setItem('craftEnglishStateHK3', JSON.stringify(state)); }
-function loadState(){ const raw = localStorage.getItem('craftEnglishStateHK3'); return raw ? JSON.parse(raw) : null; }
+function loadState(){
+  const raw = localStorage.getItem('craftEnglishStateHK3');
+  if(!raw) return null;
+  const s = JSON.parse(raw);
+  if(!s.parentPin) s.parentPin = '1234';
+  Object.keys(CATEGORY_META).forEach(cat=>{
+    if(!s.progress[cat]) s.progress[cat] = {};
+    CATEGORY_META[cat].units.forEach((u,idx)=>{
+      if(!s.progress[cat][u.id]) s.progress[cat][u.id] = { unlocked: idx===0, completed:false, bestScore:0, totalCorrect:0, totalAttempts:0, stars:0, history: [] };
+      if(!s.progress[cat][u.id].history) s.progress[cat][u.id].history = [];
+    });
+  });
+  if(!s.reminders) s.reminders = [];
+  if(!s.activityLog) s.activityLog = {};
+  if(!s.weeklyGoalXP) s.weeklyGoalXP = 200;
+  if(!s.errorLog) s.errorLog = {};
+  return s;
+}
 
 function startGame(){
   ensureMusicCtx();
@@ -316,6 +436,7 @@ function startGame(){
   document.getElementById('hud-name').innerText = state.name;
   refreshHud();
   renderCategoryGrid();
+  renderDueBanner();
   showScreen('screen-categories');
 }
 
@@ -368,7 +489,7 @@ function renderCategoryGrid(){
     div.className = 'mode-block ' + m.cls;
     div.innerHTML = `<div class="icon-wrap small">${renderIcon(ICONS[m.icon])}</div>
       <div><b>⛏️ ${m.name}</b><br><small>${m.desc}<br>已完成 ${st.completed} / ${st.total} 個單元</small></div>`;
-    div.onclick = () => enterCategory(key);
+    div.onclick = () => { isRetest = false; enterCategory(key); };
     grid.appendChild(div);
   });
 }
@@ -394,7 +515,7 @@ function renderUnitGrid(){
       <div><b>${statusIcon} ${u.name}</b><br>
       <small class="stars">${'⭐'.repeat(u.stars)}</small>
       <small> · 目標答對 ${u.goal} 題 · 限時 ${u.time}s${up.completed ? ' · 最佳 '+up.bestScore+'題' : ''}</small></div>`;
-    if(up.unlocked){ div.onclick = () => enterUnitPreview(u); }
+    if(up.unlocked){ div.onclick = () => { isRetest = false; enterUnitPreview(u); }; }
     grid.appendChild(div);
   });
 }
@@ -410,7 +531,9 @@ function enterUnitPreview(unit){
     card.innerHTML = `<div class="icon-wrap">${renderIcon(ICONS[p.icon])}</div><div class="en">${p.word}</div><div class="zh">${p.meaning}</div>`;
     wrap.appendChild(card);
   });
-  document.getElementById('preview-goal-badge').innerText = `🎯 目標：在 ${unit.time} 秒內答對 ${unit.goal} 題即可通關！`;
+  document.getElementById('preview-goal-badge').innerText = isRetest
+    ? `🔔 家長安排的覆習測驗：在 ${unit.time} 秒內答對 ${unit.goal} 題，測試知識保留程度！`
+    : `🎯 目標：在 ${unit.time} 秒內答對 ${unit.goal} 題即可通關！`;
   showScreen('screen-preview');
 }
 
@@ -597,6 +720,21 @@ function playTone(freq, duration){
   }catch(e){}
 }
 
+function todayKey(){ return new Date().toISOString().slice(0,10); }
+function logActivity(xpGained){
+  const key = todayKey();
+  if(!state.activityLog[key]) state.activityLog[key] = { xp:0, attempts:0, correct:0 };
+  state.activityLog[key].xp += xpGained;
+  state.activityLog[key].attempts += 1;
+}
+function logError(question){
+  const key = currentCategory + '::' + currentUnit.id;
+  if(!state.errorLog[key]) state.errorLog[key] = {};
+  const qKey = question.q.slice(0,60);
+  if(!state.errorLog[key][qKey]) state.errorLog[key][qKey] = { count:0, unitName: currentUnit.name, category: currentCategory };
+  state.errorLog[key][qKey].count++;
+}
+
 function answer(i, el){
   if(timeLeft <= 0) return;
   sessionAttempts++;
@@ -616,11 +754,14 @@ function answer(i, el){
     document.getElementById('feedback').innerText = comboCount >= 3 ? '🎉 COMBO BONUS!' : '✅ 答對！';
     playTone(880, 0.15);
     timeLeft = Math.min(totalTime, timeLeft + 1.5);
+    logActivity(points);
   } else {
     comboCount = 0;
     document.getElementById('feedback').innerText = '❌ 答錯了！';
     playTone(220, 0.25);
     timeLeft = Math.max(0, timeLeft - 2);
+    logActivity(0);
+    logError(currentQ);
   }
   saveState();
   if(sessionCorrect >= currentUnit.goal){
@@ -641,29 +782,60 @@ function unlockNextUnit(){
 
 function endChallenge(timeUp, goalReached){
   clearInterval(timerInterval);
-  state.xp += sessionXP;
-  state.streak = sessionCorrect;
   const up = state.progress[currentCategory][currentUnit.id];
-  if(sessionCorrect > up.bestScore) up.bestScore = sessionCorrect;
-  if(goalReached){
-    up.completed = true;
-    up.stars = Math.max(up.stars, currentUnit.stars);
-    unlockNextUnit();
+  const rate = sessionAttempts ? Math.round((sessionCorrect/sessionAttempts)*100) : 0;
+
+  if(!isRetest){
+    state.xp += sessionXP;
+    state.streak = sessionCorrect;
+    if(sessionCorrect > up.bestScore) up.bestScore = sessionCorrect;
+    if(goalReached){
+      up.completed = true;
+      up.stars = Math.max(up.stars, currentUnit.stars);
+      unlockNextUnit();
+    }
   }
+
+  if(!up.history) up.history = [];
+  up.history.push({
+    date: new Date().toISOString(),
+    correct: sessionCorrect,
+    attempts: sessionAttempts,
+    goal: currentUnit.goal,
+    rate: rate,
+    passed: goalReached,
+    isRetest: isRetest
+  });
+  if(up.history.length > 20) up.history = up.history.slice(-20);
+
+  if(isRetest){
+    state.reminders = (state.reminders||[]).map(r=>{
+      if(r.category === currentCategory && r.unitId === currentUnit.id && !r.done){
+        return Object.assign({}, r, { done: true, resultRate: rate, resultDate: new Date().toISOString() });
+      }
+      return r;
+    });
+  }
+
   refreshHud();
   saveState();
   document.getElementById('result-icon').innerHTML = renderIcon(goalReached ? ICONS.diamond_gem : ICONS.clock);
-  document.getElementById('result-title').innerText = goalReached ? '🎉 過關成功！' : '⏰ 時間到！';
+  document.getElementById('result-title').innerText = isRetest ? '🔔 覆習測驗完成！' : (goalReached ? '🎉 過關成功！' : '⏰ 時間到！');
   document.getElementById('result-score').innerText = sessionCorrect + ' / ' + currentUnit.goal + ' 題答對';
-  document.getElementById('result-diamonds').innerText = '💎 +' + sessionXP + ' XP';
-  const rate = sessionAttempts ? Math.round((sessionCorrect/sessionAttempts)*100) : 0;
-  document.getElementById('result-msg').innerText = goalReached
-    ? `恭喜通關！答對率為 ${rate}%，已解鎖下一個單元！`
-    : (timeUp ? `時間已到，未達成目標。答對率為 ${rate}%，再接再厲！` : `挑戰已中止，答對率為 ${rate}%。`);
+  document.getElementById('result-diamonds').innerText = isRetest ? ('📊 掌握程度 ' + rate + '%') : ('💎 +' + sessionXP + ' XP');
+  document.getElementById('result-msg').innerText = isRetest
+    ? `這是家長安排的覆習測驗，答對率為 ${rate}%。結果已記錄於學習報告，家長可查看孩子的知識保留情況。`
+    : (goalReached
+      ? `恭喜通關！答對率為 ${rate}%，已解鎖下一個單元！`
+      : (timeUp ? `時間已到，未達成目標。答對率為 ${rate}%，再接再厲！` : `挑戰已中止，答對率為 ${rate}%。`));
   const nextBtn = document.getElementById('result-next-btn');
   const units = CATEGORY_META[currentCategory].units;
   const idx = units.findIndex(u=>u.id === currentUnit.id);
-  if(goalReached && idx+1 < units.length){
+  if(isRetest){
+    nextBtn.style.display = 'inline-block';
+    nextBtn.innerText = '⬅️ 返回家長專區';
+    nextBtn.onclick = () => { isRetest = false; showScreen('screen-parent-dashboard'); };
+  } else if(goalReached && idx+1 < units.length){
     nextBtn.style.display = 'inline-block';
     nextBtn.innerText = '➡️ 下一關：' + units[idx+1].name;
     nextBtn.onclick = () => enterUnitPreview(units[idx+1]);
@@ -683,9 +855,269 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if(id === 'screen-report') renderReport();
-  if(id === 'screen-categories'){ renderCategoryGrid(); switchMusicTrack('menu'); }
+  if(id === 'screen-categories'){ renderCategoryGrid(); renderDueBanner(); switchMusicTrack('menu'); }
   if(id === 'screen-units'){ renderUnitGrid(); }
   if(id === 'screen-result'){ switchMusicTrack('result'); }
+  if(id === 'screen-parent-dashboard'){ renderParentDashboard(); }
+}
+
+function getDueReminders(){
+  const now = new Date();
+  return (state.reminders||[]).filter(r => !r.done && new Date(r.dueDate) <= now);
+}
+function renderDueBanner(){
+  const due = getDueReminders();
+  const banner = document.getElementById('due-reminder-banner');
+  const badge = document.getElementById('reminder-badge');
+  if(due.length > 0){
+    banner.style.display = 'block';
+    banner.innerHTML = `🔔 家長已安排 <b>${due.length}</b> 個覆習測驗，點擊「👨‍👩‍👧」進入家長專區開始測試！`;
+    if(badge) badge.style.display = 'inline-block';
+  } else {
+    banner.style.display = 'none';
+    if(badge) badge.style.display = 'none';
+  }
+}
+
+function openParentGate(){
+  document.getElementById('parent-pin-input').value = '';
+  document.getElementById('parent-pin-error').innerText = '';
+  showScreen('screen-parent-gate');
+}
+function checkParentPin(){
+  const input = document.getElementById('parent-pin-input').value;
+  if(input === (state.parentPin || '1234')){
+    parentUnlocked = true;
+    showScreen('screen-parent-dashboard');
+  } else {
+    document.getElementById('parent-pin-error').innerText = '密碼錯誤，請再試一次。';
+  }
+}
+function openChangePin(){
+  document.getElementById('new-pin-input').value = '';
+  document.getElementById('new-pin-error').innerText = '';
+  showScreen('screen-change-pin');
+}
+function saveNewPin(){
+  const val = document.getElementById('new-pin-input').value;
+  if(!/^\d{4}$/.test(val)){
+    document.getElementById('new-pin-error').innerText = '請輸入4位數字密碼。';
+    return;
+  }
+  state.parentPin = val;
+  saveState();
+  showScreen('screen-parent-dashboard');
+}
+
+function renderActivityCalendar(){
+  const container = document.getElementById('activity-calendar');
+  const days = [];
+  const today = new Date();
+  for(let i=6;i>=0;i--){
+    const d = new Date(today);
+    d.setDate(d.getDate()-i);
+    days.push(d);
+  }
+  const weekdayLabels = ['日','一','二','三','四','五','六'];
+  let maxXP = 1;
+  days.forEach(d=>{
+    const key = d.toISOString().slice(0,10);
+    const entry = state.activityLog[key];
+    if(entry && entry.xp > maxXP) maxXP = entry.xp;
+  });
+  container.innerHTML = days.map(d=>{
+    const key = d.toISOString().slice(0,10);
+    const entry = state.activityLog[key];
+    const xp = entry ? entry.xp : 0;
+    const intensity = xp === 0 ? 0.08 : Math.min(1, xp / maxXP);
+    const bg = xp === 0 ? 'rgba(255,255,255,0.08)' : `rgba(92,158,49,${0.25 + intensity*0.75})`;
+    const isToday = d.toDateString() === today.toDateString();
+    return `<div style="flex:1;text-align:center;">
+      <div style="font-size:10px;opacity:0.7;">${weekdayLabels[d.getDay()]}</div>
+      <div style="height:36px;border-radius:4px;background:${bg};border:${isToday?'2px solid #ffd76a':'1px solid #444'};display:flex;align-items:center;justify-content:center;font-size:10px;margin-top:2px;">${xp>0?xp:''}</div>
+    </div>`;
+  }).join('');
+}
+
+function updateWeeklyGoal(){
+  state.weeklyGoalXP = parseInt(document.getElementById('weekly-goal-slider').value);
+  saveState();
+  renderWeeklyGoalBar();
+}
+function renderWeeklyGoalBar(){
+  const today = new Date();
+  let weekXP = 0;
+  for(let i=0;i<7;i++){
+    const d = new Date(today);
+    d.setDate(d.getDate()-i);
+    const key = d.toISOString().slice(0,10);
+    if(state.activityLog[key]) weekXP += state.activityLog[key].xp;
+  }
+  const goal = state.weeklyGoalXP || 200;
+  const pct = Math.min(100, (weekXP/goal)*100);
+  document.getElementById('weekly-goal-bar').style.width = pct + '%';
+  document.getElementById('weekly-goal-text').innerText = `本週已賺取 ${weekXP} / ${goal} XP ${weekXP>=goal ? '🎉 已達標！' : ''}`;
+  document.getElementById('weekly-goal-slider').value = goal;
+  document.getElementById('weekly-goal-value').innerText = goal + ' XP';
+}
+
+function renderCategoryMastery(){
+  const container = document.getElementById('category-mastery-bars');
+  let html = '';
+  Object.keys(CATEGORY_META).forEach(catKey=>{
+    const units = CATEGORY_META[catKey].units;
+    let totalCorrect=0, totalAttempts=0, completedCount=0;
+    units.forEach(u=>{
+      const up = state.progress[catKey][u.id];
+      totalCorrect += up.totalCorrect;
+      totalAttempts += up.totalAttempts;
+      if(up.completed) completedCount++;
+    });
+    const rate = totalAttempts ? Math.round((totalCorrect/totalAttempts)*100) : 0;
+    const color = rate >= 80 ? '#5c9e31' : (rate >= 60 ? '#f1c40f' : '#e74c3c');
+    html += `<div style="margin-bottom:8px;">
+      <div style="font-size:12px;display:flex;justify-content:space-between;"><span>${CATEGORY_META[catKey].name.split(' ')[0]}</span><span>${completedCount}/${units.length} 單元 · ${rate}%</span></div>
+      <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${rate}%;background:${color};"></div></div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function renderWeakTopics(){
+  const container = document.getElementById('weak-topics-list');
+  const allErrors = [];
+  Object.keys(state.errorLog).forEach(unitKey=>{
+    Object.keys(state.errorLog[unitKey]).forEach(qKey=>{
+      const e = state.errorLog[unitKey][qKey];
+      allErrors.push({ question: qKey, count: e.count, unitName: e.unitName, category: e.category });
+    });
+  });
+  allErrors.sort((a,b)=>b.count-a.count);
+  if(allErrors.length === 0){
+    container.innerHTML = '<p style="opacity:0.6;">暫無明顯弱點，孩子表現良好！</p>';
+    return;
+  }
+  container.innerHTML = allErrors.slice(0,5).map(e=>`
+    <div class="goal-badge" style="text-align:left;">
+      <b>${CATEGORY_META[e.category].name.split(' ')[0]} · ${e.unitName}</b><br>
+      題目：${e.question}${e.question.length>=60?'...':''}<br>
+      <span style="color:#e74c3c;">已答錯 ${e.count} 次</span>
+    </div>
+  `).join('');
+}
+
+function exportReportCSV(){
+  let csv = '日期,單元,類型,答對率,答對數,總題數\n';
+  Object.keys(CATEGORY_META).forEach(catKey=>{
+    CATEGORY_META[catKey].units.forEach(u=>{
+      const up = state.progress[catKey][u.id];
+      (up.history||[]).forEach(h=>{
+        const d = new Date(h.date).toLocaleDateString('zh-HK');
+        csv += `${d},${u.name},${h.isRetest?'覆習測驗':'首次挑戰'},${h.rate}%,${h.correct},${h.goal}\n`;
+      });
+    });
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (state.name || 'student') + '_learning_report.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function renderParentDashboard(){
+  const now = new Date();
+  renderActivityCalendar();
+  renderWeeklyGoalBar();
+  renderCategoryMastery();
+  renderWeakTopics();
+  const pendingList = document.getElementById('pending-retest-list');
+  const pending = (state.reminders||[]).filter(r=>!r.done);
+  if(pending.length === 0){
+    pendingList.innerHTML = '<p style="opacity:0.6;">暫無待覆習項目。</p>';
+  } else {
+    pendingList.innerHTML = pending.map(r=>{
+      const unit = CATEGORY_META[r.category].units.find(u=>u.id === r.unitId);
+      const due = new Date(r.dueDate);
+      const isDue = due <= now;
+      return `<div class="goal-badge" style="text-align:left;">
+        <b>${unit ? unit.name : r.unitId}</b><br>
+        預定日期：${due.toLocaleDateString('zh-HK')} ${isDue ? '<span style=\'color:#e74c3c;\'>（已到期，可立即測試）</span>' : '（尚未到期）'}
+        <br>
+        ${isDue ? `<button class="block-btn grass" style="font-size:12px;padding:6px 10px;margin-top:6px;" onclick="launchRetest('${r.category}','${r.unitId}')">▶️ 開始覆習測驗</button>` : `<button class="block-btn stone" style="font-size:12px;padding:6px 10px;margin-top:6px;" onclick="cancelReminder('${r.category}','${r.unitId}','${r.dueDate}')">🗑️ 取消</button>`}
+      </div>`;
+    }).join('');
+  }
+
+  const completedList = document.getElementById('completed-unit-list');
+  let completedHtml = '';
+  Object.keys(CATEGORY_META).forEach(catKey=>{
+    CATEGORY_META[catKey].units.forEach(u=>{
+      const up = state.progress[catKey][u.id];
+      if(up.completed){
+        const hasPending = (state.reminders||[]).some(r=>!r.done && r.category===catKey && r.unitId===u.id);
+        completedHtml += `<div class="goal-badge" style="text-align:left;">
+          <b>${u.name}</b><br>
+          最佳成績：${up.bestScore}/${u.goal} · 累積答對率：${up.totalAttempts ? Math.round((up.totalCorrect/up.totalAttempts)*100) : 0}%
+          <br>
+          ${hasPending ? '<small style="opacity:0.6;">已有待覆習安排</small>' : `<button class="block-btn diamond" style="font-size:12px;padding:6px 10px;margin-top:6px;" onclick="openScheduleScreen('${catKey}','${u.id}')">⏰ 安排覆習</button>`}
+        </div>`;
+      }
+    });
+  });
+  completedList.innerHTML = completedHtml || '<p style="opacity:0.6;">孩子尚未完成任何單元。</p>';
+
+  const table = document.getElementById('retest-history-table');
+  table.innerHTML = '<tr><th>日期</th><th>單元</th><th>類型</th><th>答對率</th></tr>';
+  const rows = [];
+  Object.keys(CATEGORY_META).forEach(catKey=>{
+    CATEGORY_META[catKey].units.forEach(u=>{
+      const up = state.progress[catKey][u.id];
+      (up.history||[]).forEach(h=>{
+        rows.push({ date: h.date, name: u.name, isRetest: h.isRetest, rate: h.rate });
+      });
+    });
+  });
+  rows.sort((a,b)=> new Date(b.date) - new Date(a.date));
+  rows.slice(0,15).forEach(r=>{
+    const row = document.createElement('tr');
+    const d = new Date(r.date);
+    row.innerHTML = `<td>${d.toLocaleDateString('zh-HK')}</td><td>${r.name}</td><td>${r.isRetest ? '🔔 覆習測驗' : '⛏️ 首次挑戰'}</td><td>${r.rate}%</td>`;
+    table.appendChild(row);
+  });
+}
+
+function openScheduleScreen(catKey, unitId){
+  retestTargetCategory = catKey;
+  retestTargetUnit = unitId;
+  const unit = CATEGORY_META[catKey].units.find(u=>u.id===unitId);
+  document.getElementById('schedule-unit-name').innerText = `為「${unit.name}」安排覆習測驗：`;
+  showScreen('screen-schedule-retest');
+}
+function scheduleRetest(daysLater){
+  const due = new Date();
+  due.setDate(due.getDate() + daysLater);
+  if(!state.reminders) state.reminders = [];
+  state.reminders.push({ category: retestTargetCategory, unitId: retestTargetUnit, dueDate: due.toISOString(), done: false, createdDate: new Date().toISOString() });
+  saveState();
+  if(daysLater === 0){
+    launchRetest(retestTargetCategory, retestTargetUnit);
+  } else {
+    showScreen('screen-parent-dashboard');
+  }
+}
+function cancelReminder(catKey, unitId, dueDate){
+  state.reminders = (state.reminders||[]).filter(r => !(r.category===catKey && r.unitId===unitId && r.dueDate===dueDate));
+  saveState();
+  renderParentDashboard();
+}
+function launchRetest(catKey, unitId){
+  const unit = CATEGORY_META[catKey].units.find(u=>u.id===unitId);
+  currentCategory = catKey;
+  currentUnit = unit;
+  isRetest = true;
+  enterUnitPreview(unit);
 }
 
 function renderReport(){
