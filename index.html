@@ -1,90 +1,79 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-HK">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Craft English Adventure - 完整版 v1.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Craft English Adventure - 完整版 v2.0</title>
 <style>
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
-  body {
-    margin: 0; font-family: 'Courier New', monospace;
-    background: linear-gradient(to bottom, #7ec8e3 0%, #7ec8e3 58%, #6ab04c 58%, #6ab04c 100%);
-    overflow: hidden; height: 100vh; touch-action: manipulation;
-  }
-  #app { position: relative; width: 100%; height: 100vh; display: flex; flex-direction: column; }
-  .block-btn {
-    background: #7c5a3a; border: 4px solid #4a3722; border-right-color: #2e2214; border-bottom-color: #2e2214;
-    color: #fff; font-weight: bold; font-family: 'Courier New', monospace; text-shadow: 2px 2px #000;
-    padding: 14px 22px; font-size: 18px; cursor: pointer; box-shadow: 0 4px 0 #2e2214;
-  }
-  .block-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #2e2214; }
-  .block-btn.grass { background: #5c9e31; border-color: #3c6e1e; box-shadow: 0 4px 0 #2c4e10; }
-  .block-btn.diamond { background: #4ac9e0; border-color: #2a99a8; box-shadow: 0 4px 0 #1a6978; color:#083; }
-  .block-btn.lava { background: #e74c3c; border-color: #a83232; box-shadow: 0 4px 0 #7c2020; }
-  header {
-    background: #3a2b1e; color: #ffd76a; text-align: center; padding: 10px;
-    font-size: 18px; text-shadow: 2px 2px #000; border-bottom: 6px solid #2e2214;
-    display:flex; justify-content:space-between; align-items:center; padding-left:16px; padding-right:16px;
-  }
-  #hud { font-size:13px; color:#fff; display:flex; gap:12px; flex-wrap:wrap; }
-  #main { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 8px; position: relative; overflow-y:auto; }
-  .screen { display:none; width:100%; height:100%; align-items:center; justify-content:center; flex-direction:column; }
-  .screen.active { display:flex; }
-  .card {
-    background: rgba(0,0,0,0.6); border: 4px solid #ffd76a; padding: 18px; border-radius: 8px;
-    text-align: center; color: #fff; max-width: 680px; width:94%; max-height:94vh; overflow-y:auto;
-  }
-  .mode-grid { display:grid; grid-template-columns: repeat(1, 1fr); gap:12px; margin-top:14px; }
-  .mode-block {
-    background:#8b5a2b; border:4px solid #5a3b1c; border-right-color:#3a2712; border-bottom-color:#3a2712;
-    padding:16px; color:#fff; text-align:left; cursor:pointer; text-shadow:1px 1px #000; display:flex; gap:12px; align-items:center;
-  }
-  .mode-block.phonics { background:#5c9e31; border-color:#3c6e1e; }
-  .mode-block.vocab { background:#c9a227; border-color:#8c6f1a; }
-  .mode-block.reading { background:#4ac9e0; border-color:#2a99a8; }
-  .mode-block b { font-size:17px; }
-  .mode-block small { opacity:0.9; }
-  .icon-wrap { display:flex; justify-content:center; margin-bottom:4px; }
-  .icon-wrap svg { image-rendering: pixelated; width: 84px; height: 84px; filter: drop-shadow(3px 3px 0 rgba(0,0,0,0.4)); flex-shrink:0; }
-  .icon-wrap.small svg { width:40px; height:40px; }
-  .question-box { font-size: 21px; margin: 10px 0; color:#ffd76a; text-shadow:2px 2px #000; }
-  .reading-passage { background:rgba(255,255,255,0.12); padding:12px; text-align:left; font-size:17px; line-height:1.5; margin-bottom:10px; border-left:4px solid #ffd76a; }
-  .options-grid { display:grid; grid-template-columns: repeat(2,1fr); gap:10px; margin-top: 6px; }
-  .option-block {
-    background:#c9a227; border:4px solid #8c6f1a; border-right-color:#5a4610; border-bottom-color:#5a4610;
-    padding:12px; font-size:18px; font-weight:bold; color:#3a2b1e; cursor:pointer;
-  }
-  .option-block:active { transform: translateY(3px); }
-  .option-block.correct { background:#5c9e31 !important; color:#fff; }
-  .option-block.wrong { background:#a83232 !important; color:#fff; }
-
-  /* TIMER BAR */
-  #timer-outer { background:#2e2214; border:3px solid #000; height:26px; width:100%; margin-bottom:10px; position:relative; }
-  #timer-inner { background:linear-gradient(90deg,#5c9e31,#f1c40f,#e74c3c); height:100%; width:100%; transition: width 0.15s linear; }
-  #timer-text { position:absolute; top:2px; left:0; right:0; text-align:center; font-size:14px; color:#fff; text-shadow:1px 1px #000; }
-  #timer-outer.urgent #timer-inner { animation: pulse 0.4s infinite; }
-  @keyframes pulse { 0%{opacity:1;} 50%{opacity:0.5;} 100%{opacity:1;} }
-
-  #combo-display { font-size:16px; color:#ffb703; text-shadow:1px 1px #000; margin-top:4px; height:20px; }
-  #feedback { font-size: 24px; height: 32px; margin-top: 4px; }
-  table.report { width:100%; color:#fff; border-collapse: collapse; margin-top:10px; font-size:13px; }
-  table.report td, table.report th { border:2px solid #555; padding:5px; text-align:center; }
-  footer { text-align:center; padding:6px; color:#eee; font-size:10px; background:#2e2214; }
-  input#player-name { padding:10px;font-size:18px;width:70%;text-align:center;border:3px solid #4a3722; }
-  .final-score { font-size:40px; color:#ffd76a; text-shadow:3px 3px #000; margin:10px 0; }
-  .diamond-count { font-size:22px; color:#4ac9e0; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; font-family: 'Courier New', monospace; background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); color: #fff; overflow-x: hidden; user-select: none; }
+#app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+header { background: #3a2a1a; border-bottom: 4px solid #5a3b1c; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; flex-wrap: wrap; gap:6px; }
+#hud { display: flex; gap: 10px; font-size: 13px; align-items:center; flex-wrap: wrap; }
+#main { flex: 1; padding: 14px; }
+.screen { display: none; }
+.screen.active { display: block; animation: fadeIn 0.3s; }
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+.card { background: rgba(255,255,255,0.06); border: 3px solid #5a3b1c; border-radius: 6px; padding: 16px; text-align: center; }
+h2 { margin-top: 0; }
+input { width: 90%; padding: 10px; border-radius: 4px; border: 2px solid #5a3b1c; background: #222; color: #fff; font-family: inherit; font-size: 15px; text-align:center; }
+.block-btn { background: #5c9e31; border: 3px solid #3a7d23; color: #fff; padding: 12px 20px; font-family: inherit; font-weight: bold; font-size: 14px; border-radius: 4px; cursor: pointer; margin: 4px; box-shadow: 0 4px 0 #2a5c17; }
+.block-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #2a5c17; }
+.block-btn.grass { background: #5c9e31; border-color: #3a7d23; box-shadow: 0 4px 0 #2a5c17; }
+.block-btn.diamond { background: #4ac9e0; border-color: #2980b9; box-shadow: 0 4px 0 #1a5276; }
+.block-btn.stone { background: #7f8c8d; border-color: #566573; box-shadow: 0 4px 0 #444; }
+.icon-wrap { width: 96px; height: 96px; margin: 10px auto; }
+.icon-wrap.small { width: 48px; height: 48px; margin: 0; }
+.icon-wrap svg { width: 100%; height: 100%; }
+.mode-grid, .unit-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.mode-block, .unit-block { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.08); border: 3px solid #5a3b1c; border-radius: 6px; padding: 10px; cursor: pointer; text-align: left; }
+.mode-block:active, .unit-block:active { background: rgba(255,255,255,0.16); }
+.mode-block.phonics { border-color: #e74c3c; }
+.mode-block.vocab { border-color: #f1c40f; }
+.mode-block.reading { border-color: #3498db; }
+.unit-block.locked { opacity: 0.45; cursor: not-allowed; }
+.unit-block .stars { color: #f1c40f; }
+#timer-outer { background: #333; border: 2px solid #222; border-radius: 4px; height: 22px; position: relative; margin-bottom: 8px; overflow: hidden; }
+#timer-inner { background: linear-gradient(90deg, #5c9e31, #f1c40f); height: 100%; width: 100%; transition: width 0.1s linear, background 0.3s; }
+#timer-outer.urgent #timer-inner { background: #e74c3c; animation: blink 0.5s infinite; }
+@keyframes blink { 50% { opacity: 0.4; } }
+#timer-text { position: absolute; top: 0; left: 0; width: 100%; text-align: center; font-size: 13px; line-height: 22px; font-weight: bold; text-shadow: 1px 1px 2px #000; }
+.reading-passage { background: rgba(255,255,255,0.08); border: 2px solid #3498db; border-radius: 6px; padding: 10px; margin: 8px 0; font-size: 14px; line-height: 1.5; text-align: left; }
+.question-box { font-size: 16px; font-weight: bold; margin: 10px 0; min-height: 40px; }
+.options-grid { display: flex; flex-direction: column; gap: 8px; }
+.option-block { background: rgba(255,255,255,0.1); border: 2px solid #5a3b1c; border-radius: 4px; padding: 12px; cursor: pointer; font-size: 14px; }
+.option-block:active { background: rgba(255,255,255,0.2); }
+.option-block.correct { background: #3a7d23 !important; border-color: #5c9e31; }
+.option-block.wrong { background: #7d2323 !important; border-color: #e74c3c; }
+#feedback { min-height: 24px; font-weight: bold; margin: 8px 0; }
+#combo-display { color: #f1c40f; font-weight: bold; min-height: 20px; }
+.final-score { font-size: 28px; font-weight: bold; color: #ffd76a; margin: 10px 0; }
+.diamond-count { font-size: 18px; color: #4ac9e0; margin-bottom: 10px; }
+.progress-bar-outer { background: #333; border-radius: 4px; height: 12px; overflow: hidden; }
+.progress-bar-inner { height: 100%; width: 0%; transition: width 0.4s; }
+table.report { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+table.report th, table.report td { border: 1px solid #5a3b1c; padding: 6px; }
+footer { text-align: center; font-size: 10px; opacity: 0.6; padding: 10px; }
+.preview-word-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 12px 0; }
+.preview-word-card { background: rgba(255,255,255,0.08); border: 2px solid #5a3b1c; border-radius: 6px; padding: 8px; width: 90px; text-align: center; }
+.preview-word-card .icon-wrap { width: 48px; height: 48px; margin: 0 auto 4px; }
+.preview-word-card .en { font-weight: bold; font-size: 12px; }
+.preview-word-card .zh { font-size: 11px; opacity: 0.8; }
+.slider-row { display: flex; align-items: center; gap: 8px; justify-content: center; margin: 8px 0; }
+.goal-badge { background: rgba(255,215,106,0.15); border: 2px solid #ffd76a; border-radius: 6px; padding: 8px; margin: 8px 0; font-size: 13px; }
 </style>
 </head>
 <body>
 <div id="app">
   <header>
-    <div>🧱 Craft English Adventure <span style="font-size:11px;opacity:0.7;">完整版 v1.2</span></div>
+    <div>🧱 Craft English Adventure <span style="font-size:11px;opacity:0.7;">完整版 v2.0</span></div>
     <div id="hud">
       <span>👤 <span id="hud-name">小勇者</span></span>
       <span>🎖️ <span id="hud-level">Lv.1</span> <span id="hud-title">見習礦工</span></span>
       <span>💎 <span id="hud-xp">0</span> XP</span>
       <span>🔥 <span id="hud-streak">0</span></span>
       <span id="music-toggle" onclick="toggleMusic()" style="cursor:pointer;font-size:18px;">🔊</span>
+      <span onclick="openVolumePanel()" style="cursor:pointer;font-size:16px;">🎚️</span>
     </div>
   </header>
   <div id="main">
@@ -93,24 +82,45 @@
       <div class="card">
         <div class="icon-wrap" id="home-icon"></div>
         <h2 style="color:#ffd76a;">歡迎來到 Craft English Adventure！</h2>
-        <p>這是限時挖礦挑戰！請在時間耗盡前完成拼音（Phonics）、詞彙（Vocabulary）及閱讀（Reading）三大礦洞任務！</p>
+        <p>逐關學習拼音（Phonics）、詞彙（Vocabulary）及閱讀（Reading），每關先預習生字，再挑戰限時任務！</p>
         <input id="player-name" placeholder="輸入名字">
         <br><br>
         <button class="block-btn grass" onclick="startGame()">🟩 開始冒險</button>
       </div>
     </div>
 
-    <div class="screen" id="screen-levels">
+    <div class="screen" id="screen-categories">
       <div class="card">
-        <h2 style="color:#ffd76a;">選擇限時挑戰礦洞</h2>
+        <h2 style="color:#ffd76a;">選擇礦洞類別</h2>
         <div id="player-level-panel" style="background:rgba(255,255,255,0.1);padding:10px;margin-bottom:10px;border:2px solid #ffd76a;">
           <div style="font-size:16px;">🎖️ 玩家等級：<span id="panel-level">Lv.1</span> - <span id="panel-title">見習礦工</span></div>
           <div class="progress-bar-outer" style="margin-top:6px;"><div class="progress-bar-inner" id="panel-xp-bar" style="background:#4ac9e0;"></div></div>
           <div style="font-size:12px;margin-top:4px;" id="panel-xp-text">0 / 100 XP 到下一等級</div>
         </div>
-        <div class="mode-grid" id="level-grid"></div>
+        <div class="mode-grid" id="category-grid"></div>
         <br>
         <button class="block-btn diamond" onclick="showScreen('screen-report')">📊 查看學習報告</button>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-units">
+      <div class="card">
+        <h2 style="color:#ffd76a;" id="units-title">單元列表</h2>
+        <div class="unit-grid" id="unit-grid"></div>
+        <br>
+        <button class="block-btn stone" onclick="showScreen('screen-categories')">⬅️ 返回礦洞類別</button>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-preview">
+      <div class="card">
+        <h2 style="color:#ffd76a;" id="preview-title">預習生字</h2>
+        <p style="font-size:13px;opacity:0.85;">在挑戰之前，先認識以下生字，記熟了再開始遊戲！</p>
+        <div class="preview-word-grid" id="preview-word-grid"></div>
+        <div class="goal-badge" id="preview-goal-badge"></div>
+        <button class="block-btn grass" onclick="startUnitChallenge()">⛏️ 開始挑戰</button>
+        <br>
+        <button class="block-btn stone" onclick="showScreen('screen-units')">⬅️ 返回單元列表</button>
       </div>
     </div>
 
@@ -119,7 +129,7 @@
         <div id="timer-outer"><div id="timer-inner"></div><div id="timer-text">⏱️ 30s</div></div>
         <div style="display:flex; justify-content:space-between;">
           <span id="level-label" style="color:#ffd76a;">礦洞</span>
-          <span id="diff-label">難度: ⭐</span>
+          <span id="goal-label">目標：答對 0/0</span>
         </div>
         <div id="passage-area"></div>
         <div class="icon-wrap" id="game-icon"></div>
@@ -129,18 +139,20 @@
         <div id="feedback"></div>
         <div id="combo-display"></div>
         <br>
-        <button class="block-btn" onclick="endChallenge(false)">🚪 提早離開礦洞</button>
+        <button class="block-btn" onclick="endChallenge(false, false)">🚪 提早離開礦洞</button>
       </div>
     </div>
 
     <div class="screen" id="screen-result">
       <div class="card">
-        <h2 style="color:#ffd76a;">⛏️ 挑戰完成！</h2>
+        <h2 style="color:#ffd76a;" id="result-title">⛏️ 挑戰完成！</h2>
         <div class="icon-wrap" id="result-icon"></div>
         <div class="final-score" id="result-score">0 分</div>
         <div class="diamond-count" id="result-diamonds">💎 +0 XP</div>
         <p id="result-msg"></p>
-        <button class="block-btn grass" onclick="showScreen('screen-levels')">⬅️ 返回礦洞地圖</button>
+        <button class="block-btn grass" id="result-next-btn" onclick="showScreen('screen-units')">➡️ 下一關</button>
+        <br>
+        <button class="block-btn stone" onclick="showScreen('screen-units')">⬅️ 返回單元列表</button>
       </div>
     </div>
 
@@ -150,17 +162,78 @@
         <p style="font-size:12px;opacity:0.85;">內容參照香港教育局《英國語文課程指引（小一至小六）》拼音與閱讀學習重點設計</p>
         <table class="report" id="report-table"></table>
         <br>
-        <button class="block-btn grass" onclick="showScreen('screen-levels')">⬅️ 返回礦洞地圖</button>
+        <button class="block-btn grass" onclick="showScreen('screen-categories')">⬅️ 返回礦洞類別</button>
         <button class="block-btn" onclick="resetProgress()">🔄 重設進度</button>
       </div>
     </div>
+
+    <div class="screen" id="screen-volume">
+      <div class="card">
+        <h2 style="color:#ffd76a;">🎚️ 音量調整</h2>
+        <div class="slider-row"><span style="width:70px;text-align:left;">主旋律</span><input type="range" min="0" max="100" id="vol-melody" oninput="updateVolume()"></div>
+        <div class="slider-row"><span style="width:70px;text-align:left;">低音</span><input type="range" min="0" max="100" id="vol-bass" oninput="updateVolume()"></div>
+        <div class="slider-row"><span style="width:70px;text-align:left;">和弦</span><input type="range" min="0" max="100" id="vol-chords" oninput="updateVolume()"></div>
+        <br>
+        <button class="block-btn grass" onclick="closeVolumePanel()">✅ 完成</button>
+      </div>
+    </div>
   </div>
-  <footer>iPad 適用 · 完整版 v1.0 · 限時挑戰 · 香港生活場景 · 自動難度調整 · 發音朗讀 · 音效回饋 · 內容參照 EDB 課程指引</footer>
+  <footer>iPad 適用 · 完整版 v2.0 · 單元制學習 · 預習+限時挑戰 · 香港生活場景 · 音量可調 · 內容參照 EDB 課程指引</footer>
 </div>
 
 <script>
-/* ============ PIXEL ART ICON ENGINE ============ */
+const ICONS = {
+  apple:{palette:{R:'#d62828',G:'#3a7d23',B:'#4a2c17',W:'#f4e9d8'},grid:["....GG......","...GRRG.....",".B.RRRRR....","..RRRRRRR...",".RRRRRRRRR..","RRRWRRRRRR..","RRRRWRRRRR..","RRRRRRRRRR..",".RRRRRRRR...","..RRRRRR....","...RRRR.....","............"]},
+  schoolbag:{palette:{R:'#c0392b',K:'#2c2c2c',Y:'#f1c40f',B:'#2c3e50'},grid:["...KKKK.....","..RRRRRR....","..RRRRRR....",".RRRRRRRR...","RRRRRRRRRR..","RRYYRRYYRR..","RRYYRRYYRR..","RRRRRRRRRR..","RRRRRRRRRR..",".RRBBBBRR...",".RRBBBBRR...","..KK..KK...."]},
+  minibus:{palette:{R:'#e74c3c',W:'#ecf0f1',K:'#2c2c2c',G:'#95a5a6'},grid:["............","..WWWWWWWW..",".WRRRRRRRW..","WRRWWWWRRW..","WRRRRRRRRW..","WRRRRRRRRW..","WWWWWWWWWW..","WGGGGGGGGW..","..K.WW.K....","..KK..KK....","............","............"]},
+  ferry:{palette:{G:'#27ae60',W:'#ecf0f1',B:'#2980b9',K:'#2c2c2c'},grid:["....KK......","....WW......",".WWWWWWWW...",".WGGGGGGW...",".WGWWWWGW...",".WGGGGGGW...","WWWWWWWWWW..","BBBBBBBBBBB.","BBBBBBBBBBBB","............","............","............"]},
+  mtr:{palette:{R:'#c0392b',W:'#ecf0f1',K:'#2c2c2c',L:'#3498db'},grid:["............",".WWWWWWWWW..",".WRRRRRRRW..",".WRLLLLLRW..",".WRRRRRRRW..",".WWWWWWWWW..",".WKK..KKW...","............","............","............","............","............"]},
+  dimsum:{palette:{A:'#a0622d',W:'#f7e6c4',K:'#5a3b1c'},grid:["............","..AAAAAAAA..",".AWWWWWWWA..","AWWWWWWWWWA.","AWWKWWKWWWA.","AWWWWWWWWWA.",".AWWWWWWWA..","..AAAAAAAA..","....AAAA....","............","............","............"]},
+  eggwaffle:{palette:{Y:'#f4b400',A:'#a0622d'},grid:["............",".YY.YY.YY...","YYYYYYYYYY..",".YY.YY.YY...","YYYYYYYYYY..",".YY.YY.YY...","YYYYYYYYYY..","............","............","............","............","............"]},
+  milktea:{palette:{A:'#6f4e37',W:'#ecf0f1',K:'#2c2c2c'},grid:["............",".WWWWWWWW...",".WAAAAAAW...",".WAAAAAAW...",".WAAAAAAW...",".WAAAAAAW...","..WWWWWW....","...KKKK.....","............","............","............","............"]},
+  slide:{palette:{Y:'#f1c40f',R:'#e74c3c',G:'#5c9e31'},grid:["......YY....",".....YY.....","....YY......","...YY.......","..YYRRRRRR..",".YY.........","YY..........","............","GGGGGGGGGGGG","............","............","............"]},
+  book:{palette:{R:'#c0392b',W:'#ecf0f1',K:'#2c2c2c'},grid:["............",".RRRRRRRRR..","RWWWWWWWWWR.","RWKKKKKKKWR.","RWWWWWWWWWR.","RWKKKKKKKWR.","RWWWWWWWWWR.","RRRRRRRRRR..","............","............","............","............"]},
+  familyhouse:{palette:{A:'#a0622d',R:'#c0392b',Y:'#f4e9d8'},grid:["....RR......","...RRRR.....","..RRRRRR....",".RRRRRRRR...","AAAAAAAAAAAA","AYYAAAAYYAAA","AYYAAAAYYAAA","AAAAAAAAAAAA","............","............","............","............"]},
+  cat:{palette:{O:'#e67e22',K:'#2c2c2c',W:'#f7f0e3'},grid:["..O....O....",".OO.....OO..","OOOOOOOOOOO.","OOWWOOOWWOO.","OOWKOOOKWOO.","OOOOOOOOOOO.","O.OOOOOOOO..",".OOOOOOOO...","............","............","............","............"]},
+  dog:{palette:{A:'#8b5a2b',K:'#2c2c2c',W:'#f7f0e3'},grid:["A.......A...","AA.....AA...","AAAAAAAAAAA.","AWWKWKWWA...","AAAAAAAAAAA.","..AAAAAA....","............","............","............","............","............","............"]},
+  ball:{palette:{B:'#2980b9',W:'#ecf0f1'},grid:["...BB.......","..BWWB......",".BWBWB......",".BWBWB......","..BWWB......","...BB.......","............","............","............","............","............","............"]},
+  sun:{palette:{Y:'#f4b400',O:'#e67e22'},grid:["..Y...Y.....",".YYYYYYY....","YYOOOOOYY...","YOOOOOOOY...","YOOOOOOOY...","YYOOOOOYY...",".YYYYYYY....","..Y...Y.....","............","............","............","............"]},
+  ruler:{palette:{Y:'#f1c40f',K:'#2c2c2c'},grid:["............","YYYYYYYYYYYY","YKYKYKYKYKYK","YYYYYYYYYYYY","............","............","............","............","............","............","............","............"]},
+  pencilcase:{palette:{B:'#2980b9',Y:'#f1c40f'},grid:["............",".BBBBBBBBB..","BYYYYYYYYYB.","BYYYYYYYYYB.","BYYYYYYYYYB.",".BBBBBBBBB..","............","............","............","............","............","............"]},
+  classmates:{palette:{S:'#f1c27d',B:'#3498db',P:'#e91e8f'},grid:["S....S......",".B....P.....","BB....PP....","............","............","............","............","............","............","............","............","............"]},
+  steve:{palette:{S:'#dba36b',A:'#5a3b1c',B:'#3a5fcd',G:'#2c2c2c'},grid:["..AAAA......",".ASSSSA.....","..SGSGS.....","..SSSSS.....",".BBBBBB.....","BBBBBBBB....","..BB.BB.....","..G...G.....","............","............","............","............"]},
+  diamond_gem:{palette:{C:'#4ac9e0',W:'#eafcff'},grid:["....CCCC....","...CWCWCC...","..CCCCCCCC..",".CCCCCCCCCC.","CCCCCCCCCCCC",".CCCCCCCCCC.","..CCCCCCCC..","...CCCCCC...","....CCCC....","............","............","............"]},
+  clock:{palette:{Y:'#f1c40f',K:'#2c2c2c'},grid:["....YYYY....","..YYYYYYYY..",".YYYYYYYYYY.",".YYYKYYYYYY.",".YYYKKYYYYY.",".YYYYYYYYYY.",".YYYYYYYYYY.","..YYYYYYYY..","....YYYY....","............","............","............"]},
+  teacher:{palette:{S:'#f1c27d',B:'#2c3e50',A:'#5a3b1c'},grid:["..AAAA......",".ASSSSA.....","..SSSSS.....",".BBBBBBB....","BBBBBBBB....","..B....B....","............","............","............","............","............","............"]},
+  umbrella:{palette:{R:'#e74c3c',K:'#2c2c2c'},grid:["....RRRR....","..RRRRRRRR..",".RRRRRRRRRR.","RRRRRRRRRRRR","............","....KK......","....KK......","....KK......","....KKK.....","............","............","............"]},
+  bird:{palette:{B:'#3498db',Y:'#f1c40f'},grid:["....BB......",".BBBBBBY....","BBBBBBBBY...",".BBBBBB.....","..B..B......","............","............","............","............","............","............","............"]},
+  orange_fruit:{palette:{O:'#e67e22',G:'#27ae60'},grid:["....GG......","...OOOO.....","..OOOOOO....",".OOOOOOOO...","OOOOOOOOOO..","OOOOOOOOOO..",".OOOOOOOO...","..OOOOOO....","...OOOO.....","............","............","............"]},
+  star:{palette:{Y:'#f1c40f'},grid:["....Y.......",".....Y......","YYYYYYYYYYY.","..YYYYY.....",".YY...YY....","YY......YY..","............","............","............","............","............","............"]},
+  moon:{palette:{Y:'#f4e9d8'},grid:["...YYY......","..YYYYY.....",".YYYYYY.....",".YYYYYY.....",".YYYYYY.....","..YYYYY.....","...YYY......","............","............","............","............","............"]},
+  cloud:{palette:{W:'#ecf0f1'},grid:["...WWWW.....","..WWWWWWW...",".WWWWWWWWW..","WWWWWWWWWWW.","............","............","............","............","............","............","............","............"]},
+  rain:{palette:{B:'#3498db',W:'#ecf0f1'},grid:["...WWWW.....","..WWWWWWW...",".WWWWWWWWW..","WWWWWWWWWWW.","..B..B......","..B..B......",".B..B.......","............","............","............","............","............"]},
+  bread:{palette:{A:'#c9a066',K:'#8b5a2b'},grid:["............","..AAAA......",".AAAAAA.....","AAAAAAAA....","AAAAAAAA....",".AAAAAA.....","..KKKKKK....","............","............","............","............","............"]},
+  taxi:{palette:{R:'#e74c3c',W:'#ecf0f1',K:'#2c2c2c'},grid:["............","..RRRRRRRR..",".RRRRRRRRRR.","RRRWWWWRRRR.","RRRRRRRRRRR.","RRRRRRRRRRR.","RRRRRRRRRRR.","..K.RR.K....","..KK..KK....","............","............","............"]},
+  hospital:{palette:{W:'#ecf0f1',R:'#e74c3c'},grid:["............",".WWWWWWWWW..",".WRRRRRRRW..",".WRRWWWRRW..",".WRRWWWRRW..",".WRRRRRRRW..",".WWWWWWWWW..","............","............","............","............","............"]},
+  playground_scene:{palette:{Y:'#f1c40f',G:'#5c9e31'},grid:["......YY....",".....YY.....","....YY......","...YY.......","..YYYYYYYY..",".YY.........","YY..........","............","GGGGGGGGGGGG","............","............","............"]},
+  happy:{palette:{Y:'#f4b400',K:'#2c2c2c'},grid:["...YYYY.....","..YYYYYY....",".YYYYYYYY...",".YKYYYYKY...",".YYYYYYYY...",".YKYYYYKY...","..YKKKKY....","...YYYY.....","............","............","............","............"]},
+  sad:{palette:{Y:'#f4b400',K:'#2c2c2c'},grid:["...YYYY.....","..YYYYYY....",".YYYYYYYY...",".YKYYYYKY...",".YYYYYYYY...","..YKKKKY....",".YKYYYYKY...","...YYYY.....","............","............","............","............"]},
+  runner:{palette:{S:'#f1c27d',B:'#3498db',K:'#2c2c2c'},grid:["....SS......",".....S......","....BBB.....","...BBBB.....","..K.BB.K....",".K..BB..K...","....B.B.....","...K...K....","............","............","............","............"]},
+  jumper:{palette:{S:'#f1c27d',R:'#e74c3c',K:'#2c2c2c'},grid:["....SS......",".....S......","....RRR.....","...RRRRR....",".K..RR..K...","..K.RR.K....","....R.R.....","....K.K.....","............","............","............","............"]},
+  box:{palette:{A:'#a0622d',K:'#5a3b1c'},grid:["............",".AAAAAAAA...",".AKKKKKKA...","AAAAAAAAAA..","AKKKKKKKKA..","AKKKKKKKKA..","AAAAAAAAAA..","............","............","............","............","............"]},
+  table:{palette:{A:'#a0622d'},grid:["............","AAAAAAAAAAAA","AAAAAAAAAAAA","....A..A....","....A..A....","....A..A....","............","............","............","............","............","............"]},
+  chair:{palette:{A:'#8b5a2b'},grid:["............","AA..........","AA..........","AAAAAAAA....","......A.....",".......A....","......A.....",".......A....","............","............","............","............"]},
+  watch_clock:{palette:{Y:'#f1c40f',K:'#2c2c2c'},grid:["....YYYY....","..YYYYYYYY..",".YYYYYYYYYY.",".YYYKYYYYYY.",".YYYKKYYYYY.",".YYYYYYYYYY.",".YYYYYYYYYY.","..YYYYYYYY..","....YYYY....","............","............","............"]},
+  number_five:{palette:{B:'#2980b9'},grid:["............","BBBBBB......","BB..........","BBBBB.......","....BB......","BBBBB.......","............","............","............","............","............","............"]},
+  shell:{palette:{O:'#e67e22',W:'#f7f0e3'},grid:["............","...OOOO.....","..OOOOOO....",".OOWWWWOO...","OOWWWWWWOO..","OOWWWWWWOO..",".OOWWWWOO...","..OOOOOO....","...OOOO.....","............","............","............"]},
+  chick:{palette:{Y:'#f1c40f',O:'#e67e22'},grid:["............","...YYYY.....","..YYYYYY....",".YYYYYYYY...",".YYYOYYYY...","..YYYYYY....","...YY.YY....","............","............","............","............","............"]},
+  cheese:{palette:{Y:'#f4b400',W:'#fffbe6'},grid:["............","..YYYYYYY...",".YYYYYYYYY..","YYWYYYYWYY..","YYYYYYYYYY..","YYYWYYYYYY..","YYYYYYYYYY..","............","............","............","............","............"]},
+  thumb:{palette:{S:'#f1c27d'},grid:["............","...SS.......","...SS.......","...SS.......","..SSSSSS....","..SSSSSSS...","..SSSSSSS...","...SSSSS....","............","............","............","............"]},
+  whale:{palette:{B:'#3498db',W:'#ecf0f1'},grid:["............","..BBBBBBBB..",".BBBBBBBBBB.","BBBBBBBBBBBB","BBBWWWBBBB..",".BBBBBBBB...","..BBBBBB....","............","............","............","............","............"]}
+};
+
 function renderIcon(icon){
+  if(!icon) return '';
   const g = icon.grid, p = icon.palette, n = g.length;
   let rects = '';
   for(let y=0;y<n;y++){
@@ -173,206 +246,64 @@ function renderIcon(icon){
   }
   return `<svg viewBox="0 0 ${n} ${n}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">${rects}</svg>`;
 }
-const ICONS = {
-  apple:{palette:{R:'#d62828',G:'#3a7d23',B:'#4a2c17',W:'#f4e9d8'},grid:["....GG......","...GRRG.....",".B.RRRRR....","..RRRRRRR...",".RRRRRRRRR..","RRRWRRRRRR..","RRRRWRRRRR..","RRRRRRRRRR..",".RRRRRRRR...","..RRRRRR....","...RRRR.....","............"]},
-  schoolbag:{palette:{R:'#c0392b',K:'#2c2c2c',Y:'#f1c40f',B:'#2c3e50'},grid:["...KKKK.....","..RRRRRR....","..RRRRRR....",".RRRRRRRR...","RRRRRRRRRR..","RRYYRRYYRR..","RRYYRRYYRR..","RRRRRRRRRR..","RRRRRRRRRR..",".RRBBBBRR...",".RRBBBBRR...","..KK..KK...."]},
-  minibus:{palette:{R:'#e74c3c',W:'#ecf0f1',K:'#2c2c2c',G:'#95a5a6'},grid:["............","..WWWWWWWW..",".WRRRRRRRW..","WRRWWWWRRW..","WRRRRRRRRW..","WRRRRRRRRW..","WWWWWWWWWW..","WGGGGGGGGW..","..K.WW.K....","..KK..KK....","............","............"]},
-  ferry:{palette:{G:'#27ae60',W:'#ecf0f1',B:'#2980b9',K:'#2c2c2c'},grid:["....KK......","....WW......",".WWWWWWWW...",".WGGGGGGW...",".WGWWWWGW...",".WGGGGGGW...","WWWWWWWWWW..","BBBBBBBBBBB.","BBBBBBBBBBBB","............","............","............"]},
-  mtr:{palette:{R:'#c0392b',W:'#ecf0f1',K:'#2c2c2c',L:'#3498db'},grid:["............",".WWWWWWWWW..",".WRRRRRRRW..",".WRLLLLLRW..",".WRRRRRRRW..",".WWWWWWWWW..",".WKK..KKW...","............","............","............","............","............"]},
-  dimsum:{palette:{Br:'#a0622d',W:'#f7e6c4',K:'#5a3b1c'},grid:["............","..BrBrBrBr..",".BrWWWWWWBr.","BrWWWWWWWWBr","BrWWKWWKWWBr","BrWWWWWWWWBr",".BrWWWWWWBr.","..BrBrBrBr..","....BrBr....","............","............","............"]},
-  eggwaffle:{palette:{Y:'#f4b400',Br:'#a0622d'},grid:["............",".YY.YY.YY...","YYYYYYYYYY..",".YY.YY.YY...","YYYYYYYYYY..",".YY.YY.YY...","YYYYYYYYYY..","............","............","............","............","............"]},
-  milktea:{palette:{Br:'#6f4e37',W:'#ecf0f1',K:'#2c2c2c'},grid:["............",".WWWWWWWW...",".WBrBrBrW...",".WBrBrBrW...",".WBrBrBrW...",".WBrBrBrW...","..WWWWWW....","...KKKK.....","............","............","............","............"]},
-  slide:{palette:{Y:'#f1c40f',R:'#e74c3c',G:'#5c9e31'},grid:["......YY....",".....YY.....","....YY......","...YY.......","..YYRRRRRR..",".YY.........","YY..........","............","GGGGGGGGGGGG","............","............","............"]},
-  book:{palette:{R:'#c0392b',W:'#ecf0f1',K:'#2c2c2c'},grid:["............",".RRRRRRRRR..","RWWWWWWWWWR.","RWKKKKKKKWR.","RWWWWWWWWWR.","RWKKKKKKKWR.","RWWWWWWWWWR.","RRRRRRRRRR..","............","............","............","............"]},
-  familyhouse:{palette:{Br:'#a0622d',R:'#c0392b',Y:'#f4e9d8'},grid:["....RR......","...RRRR.....","..RRRRRR....",".RRRRRRRR...","BrBrBrBrBrBr","BrYYBrBrYYBr","BrYYBrBrYYBr","BrBrBrBrBrBr","............","............","............","............"]},
-  cat:{palette:{O:'#e67e22',K:'#2c2c2c',W:'#f7f0e3'},grid:["..O....O....",".OO.....OO..","OOOOOOOOOOO.","OOWWOOOWWOO.","OOWKOOOKWOO.","OOOOOOOOOOO.","O.OOOOOOOO..",".OOOOOOOO...","............","............","............","............"]},
-  dog:{palette:{Br:'#8b5a2b',K:'#2c2c2c',W:'#f7f0e3'},grid:["Br.......Br.","BrBr...BrBr.","BrBrBrBrBrBr","BrWWKWKWWBr.","BrBrBrBrBrBr","..BrBrBrBr..","............","............","............","............","............","............"]},
-  ball:{palette:{Bl:'#2980b9',W:'#ecf0f1'},grid:["...BlBl.....","..BlWWBl....",".BlWBlWBl...",".BlWBlWBl...","..BlWWBl....","...BlBl.....","............","............","............","............","............","............"]},
-  sun:{palette:{Y:'#f4b400',O:'#e67e22'},grid:["..Y...Y.....",".YYYYYYY....","YYOOOOOYY...","YOOOOOOOY...","YOOOOOOOY...","YYOOOOOYY...",".YYYYYYY....","..Y...Y.....","............","............","............","............"]},
-  ruler:{palette:{Y:'#f1c40f',K:'#2c2c2c'},grid:["............","YYYYYYYYYYYY","YKYKYKYKYKYK","YYYYYYYYYYYY","............","............","............","............","............","............","............","............"]},
-  pencilcase:{palette:{Bl:'#2980b9',Y:'#f1c40f',K:'#2c2c2c'},grid:["............",".BlBlBlBlBl..","BlYYYYYYYBl.","BlYYYYYYYBl.","BlYYYYYYYBl.",".BlBlBlBlBl..","............","............","............","............","............","............"]},
-  classmates:{palette:{Sk:'#f1c27d',Bl:'#3498db',Pk:'#e91e8f'},grid:["Sk....Sk....",".Bl....Pk...","BlBl..PkPk..","............","............","............","............","............","............","............","............","............"]},
-  steve:{palette:{Sk:'#dba36b',Br:'#5a3b1c',Bl:'#3a5fcd',Gr:'#2c2c2c'},grid:["..BrBrBrBr..",".BrSkSkSkBr.","..SkGrSkGr..","..SkSkSkSk..",".BlBlBlBlBl.","BlBlBlBlBlBl","..BlBl.BlBl.","..Gr...Gr...","............","............","............","............"]},
-  diamond_gem:{palette:{C:'#4ac9e0',W:'#eafcff'},grid:["....CCCC....","...CWCWCC...","..CCCCCCCC..",".CCCCCCCCCC.","CCCCCCCCCCCC",".CCCCCCCCCC.","..CCCCCCCC..","...CCCCCC...","....CCCC....","............","............","............"]},
-  clock:{palette:{Y:'#f1c40f',K:'#2c2c2c'},grid:["....YYYY....","..YYYYYYYY..",".YYYYYYYYYY.",".YYYKYYYYYY.",".YYYKKYYYYY.",".YYYYYYYYYY.",".YYYYYYYYYY.","..YYYYYYYY..","....YYYY....","............","............","............"]}
+
+const PHONICS_UNITS = [
+{id:"phonics_u1",tier:1,stars:1,name:"拼音第一關：首音配對 Initial Sounds",goal:6,time:45,preview:[{word:"Cat",icon:"cat",meaning:"貓"},{word:"Dog",icon:"dog",meaning:"狗"},{word:"Ball",icon:"ball",meaning:"球"},{word:"Sun",icon:"sun",meaning:"太陽"},{word:"Bag",icon:"schoolbag",meaning:"書包"}],questions:[{q:"哪一個字的首音與「Cat」相同？",opts:["Can", "Dog", "Sun", "Bag"],correct:0,icon:"cat"},{q:"哪一個字的首音與「Dog」相同？",opts:["Bus", "Dig", "Cup", "Map"],correct:1,icon:"dog"},{q:"哪一個字的首音與「Ball」相同？",opts:["Bag", "Sun", "Egg", "Ant"],correct:0,icon:"ball"},{q:"哪一個字的首音與「Sun」相同？",opts:["Sit", "Bus", "Cat", "Dog"],correct:0,icon:"sun"},{q:"哪一個字的首音與「Bag」相同？",opts:["Bus", "Cat", "Sun", "Pen"],correct:0,icon:"schoolbag"},{q:"哪一個字的首音與「Fun」相同？",opts:["Fan", "Bus", "Cat", "Sun"],correct:0,icon:"ball"},{q:"哪一個字的首音與「Map」相同？",opts:["Man", "Dog", "Cat", "Sun"],correct:0,icon:"mtr"},{q:"哪一個字的首音與「Pen」相同？",opts:["Pig", "Dog", "Sun", "Bus"],correct:0,icon:"ruler"},{q:"哪一個字的首音與「Van」相同？",opts:["Vet", "Dog", "Cat", "Sun"],correct:0,icon:"minibus"},{q:"哪一個字的首音與「Net」相同？",opts:["Nut", "Dog", "Bus", "Sun"],correct:0,icon:"ball"}]},
+{id:"phonics_u2",tier:2,stars:1,name:"拼音第二關：尾音配對 Final Sounds",goal:7,time:50,preview:[{word:"Hat",icon:"familyhouse",meaning:"帽子"},{word:"Map",icon:"mtr",meaning:"地圖"},{word:"Bus",icon:"minibus",meaning:"巴士"},{word:"Pen",icon:"ruler",meaning:"筆"},{word:"Dog",icon:"dog",meaning:"狗"}],questions:[{q:"哪一個字的尾音與「Cat」相同？",opts:["Hat", "Cap", "Can", "Car"],correct:0,icon:"cat"},{q:"哪一個字的尾音與「Dog」相同？",opts:["Log", "Bag", "Bus", "Sun"],correct:0,icon:"dog"},{q:"哪一個字的尾音與「Ball」相同？",opts:["Wall", "Bus", "Cat", "Sun"],correct:0,icon:"ball"},{q:"哪一個字的尾音與「Map」相同？",opts:["Cap", "Cat", "Bus", "Sun"],correct:0,icon:"mtr"},{q:"哪一個字的尾音與「Sun」相同？",opts:["Fun", "Sit", "Bus", "Cat"],correct:0,icon:"sun"},{q:"哪一個字的尾音與「Pen」相同？",opts:["Ten", "Tap", "Tip", "Top"],correct:0,icon:"ruler"},{q:"哪一個字的尾音與「Bag」相同？",opts:["Tag", "Dog", "Sun", "Bus"],correct:0,icon:"schoolbag"},{q:"哪一個字的尾音與「Big」相同？",opts:["Pig", "Bag", "Sun", "Bus"],correct:0,icon:"dog"},{q:"哪一個字的尾音與「Bus」相同？",opts:["Gas", "Dog", "Cat", "Sun"],correct:0,icon:"minibus"},{q:"哪一個字的尾音與「Fun」相同？",opts:["Run", "Fig", "Cat", "Sun"],correct:0,icon:"ball"}]},
+{id:"phonics_u3",tier:3,stars:2,name:"拼音第三關：中間音與拼讀 Middle Sounds",goal:7,time:50,preview:[{word:"Cat",icon:"cat",meaning:"貓 (a音)"},{word:"Dog",icon:"dog",meaning:"狗 (o音)"},{word:"Sun",icon:"sun",meaning:"太陽 (u音)"},{word:"Pen",icon:"ruler",meaning:"筆 (e音)"},{word:"Big",icon:"dog",meaning:"大 (i音)"}],questions:[{q:"哪一個字的中間音與「Cat」相同 (a)？",opts:["Bag", "Dog", "Sun", "Bus"],correct:0,icon:"schoolbag"},{q:"哪一個字的中間音與「Dog」相同 (o)？",opts:["Top", "Cat", "Sun", "Bus"],correct:0,icon:"slide"},{q:"哪一個字的中間音與「Sun」相同 (u)？",opts:["Fun", "Cat", "Dog", "Pen"],correct:0,icon:"ball"},{q:"哪一個字的中間音與「Pen」相同 (e)？",opts:["Ten", "Cat", "Dog", "Sun"],correct:0,icon:"ruler"},{q:"哪一個字的中間音與「Big」相同 (i)？",opts:["Pig", "Cat", "Dog", "Sun"],correct:0,icon:"dog"},{q:"哪一個字讀 /k-a-t/？",opts:["Cat", "Cop", "Cup", "Cut"],correct:0,icon:"cat"},{q:"哪一個字讀 /d-o-g/？",opts:["Dig", "Dog", "Dug", "Deg"],correct:1,icon:"dog"},{q:"哪一個字讀 /s-u-n/？",opts:["Sin", "Son", "Sun", "San"],correct:2,icon:"sun"},{q:"哪一個字讀 /p-e-n/？",opts:["Pin", "Pen", "Pan", "Pun"],correct:1,icon:"ruler"},{q:"哪一個字讀 /b-i-g/？",opts:["Bag", "Big", "Bug", "Beg"],correct:1,icon:"dog"}]},
+{id:"phonics_u4",tier:4,stars:3,name:"拼音第四關：押韻大挑戰 Rhyming Challenge",goal:8,time:55,preview:[{word:"Cat / Hat",icon:"cat",meaning:"押韻: at"},{word:"Dog / Fog",icon:"dog",meaning:"押韻: og"},{word:"Sun / Fun",icon:"sun",meaning:"押韻: un"},{word:"Bag / Tag",icon:"schoolbag",meaning:"押韻: ag"},{word:"Big / Pig",icon:"dog",meaning:"押韻: ig"}],questions:[{q:"哪一個字與「Cat」押韻？",opts:["Hat", "Dog", "Sun", "Bus"],correct:0,icon:"cat"},{q:"哪一個字與「Dog」押韻？",opts:["Fog", "Cat", "Sun", "Bus"],correct:0,icon:"dog"},{q:"哪一個字與「Sun」押韻？",opts:["Cat", "Fun", "Dog", "Bag"],correct:1,icon:"sun"},{q:"哪一個字與「Bag」押韻？",opts:["Tag", "Dog", "Sun", "Bus"],correct:0,icon:"schoolbag"},{q:"哪一個字與「Big」押韻？",opts:["Pig", "Bag", "Sun", "Bus"],correct:0,icon:"dog"},{q:"哪一個字與「Pen」押韻？",opts:["Ten", "Pan", "Pin", "Pun"],correct:0,icon:"ruler"},{q:"哪一個字與「Map」押韻？",opts:["Cap", "Cat", "Bus", "Sun"],correct:0,icon:"mtr"},{q:"哪一個字與「Net」押韻？",opts:["Wet", "Nut", "Nat", "Not"],correct:0,icon:"ball"},{q:"哪一個字與「Van」押韻？",opts:["Man", "Ven", "Vin", "Von"],correct:0,icon:"minibus"},{q:"哪一個字與「Red」押韻？",opts:["Bed", "Rid", "Rad", "Rud"],correct:0,icon:"apple"}]},
+{id:"phonics_u5",tier:5,stars:3,name:"拼音第五關：連音組合 Consonant Blends (P2)",goal:8,time:55,preview:[{word:"Stop",icon:"runner",meaning:"停 (st-)"},{word:"Frog",icon:"whale",meaning:"青蛙 (fr-)"},{word:"Plan",icon:"table",meaning:"計劃 (pl-)"},{word:"Grass",icon:"cloud",meaning:"草 (gr-)"},{word:"Clock",icon:"watch_clock",meaning:"鐘 (cl-)"}],questions:[{q:"哪一個字以「st-」連音開始？",opts:["Stop", "Dog", "Sun", "Bag"],correct:0,icon:"runner"},{q:"哪一個字以「fr-」連音開始？",opts:["Frog", "Cat", "Bus", "Pen"],correct:0,icon:"whale"},{q:"哪一個字以「pl-」連音開始？",opts:["Plan", "Sun", "Dog", "Map"],correct:0,icon:"table"},{q:"哪一個字以「gr-」連音開始？",opts:["Grass", "Cat", "Bag", "Pen"],correct:0,icon:"cloud"},{q:"哪一個字以「cl-」連音開始？",opts:["Clock", "Sun", "Dog", "Bus"],correct:0,icon:"watch_clock"},{q:"哪一個字以「bl-」連音開始？",opts:["Black", "Cat", "Sun", "Map"],correct:0,icon:"cloud"},{q:"哪一個字以「dr-」連音開始？",opts:["Drum", "Bag", "Dog", "Pen"],correct:0,icon:"table"},{q:"哪一個字以「sw-」連音開始？",opts:["Swim", "Cat", "Bus", "Sun"],correct:0,icon:"whale"},{q:"哪一個字以「tr-」連音開始？",opts:["Train", "Dog", "Bag", "Map"],correct:0,icon:"runner"},{q:"哪一個字以「sn-」連音開始？",opts:["Snake", "Sun", "Cat", "Bus"],correct:0,icon:"cloud"}]},
+{id:"phonics_u6",tier:6,stars:3,name:"拼音第六關：雙字母音 Digraphs (P2)",goal:8,time:55,preview:[{word:"Ship",icon:"ferry",meaning:"船 (sh)"},{word:"Chair",icon:"chair",meaning:"椅子 (ch)"},{word:"Think",icon:"happy",meaning:"想 (th)"},{word:"Whale",icon:"whale",meaning:"鯨魚 (wh)"},{word:"Photo",icon:"book",meaning:"相片 (ph)"}],questions:[{q:"哪一個字包含「sh」雙字母音？",opts:["Ship", "Cat", "Bus", "Dog"],correct:0,icon:"ferry"},{q:"哪一個字包含「ch」雙字母音？",opts:["Chair", "Sun", "Bag", "Pen"],correct:0,icon:"chair"},{q:"哪一個字包含「th」雙字母音？",opts:["Think", "Dog", "Cat", "Bus"],correct:0,icon:"happy"},{q:"哪一個字包含「wh」雙字母音？",opts:["Whale", "Sun", "Map", "Bag"],correct:0,icon:"whale"},{q:"哪一個字包含「ph」雙字母音？",opts:["Photo", "Cat", "Dog", "Bus"],correct:0,icon:"book"},{q:"「Fish」中的「sh」讀音與哪個字相同？",opts:["Wish", "Cat", "Dog", "Sun"],correct:0,icon:"ferry"},{q:"「Chip」中的「ch」讀音與哪個字相同？",opts:["Chin", "Sun", "Bag", "Pen"],correct:0,icon:"chair"},{q:"「Bath」中的「th」讀音與哪個字相同？",opts:["Path", "Dog", "Cat", "Bus"],correct:0,icon:"happy"},{q:"哪一個字以「wh-」開始並代表動物？",opts:["Whale", "Cat", "Dog", "Bird"],correct:0,icon:"whale"},{q:"哪一個字包含「ch」並代表傢俱？",opts:["Chair", "Table", "Bag", "Book"],correct:0,icon:"chair"}]},
+{id:"phonics_u7",tier:7,stars:3,name:"拼音第七關：默音e Silent E (P2)",goal:9,time:60,preview:[{word:"Cake",icon:"cheese",meaning:"蛋糕 (a_e)"},{word:"Bike",icon:"runner",meaning:"單車 (i_e)"},{word:"Home",icon:"familyhouse",meaning:"家 (o_e)"},{word:"Cute",icon:"chick",meaning:"可愛 (u_e)"},{word:"Time",icon:"watch_clock",meaning:"時間 (i_e)"}],questions:[{q:"哪一個字有默音e令a讀長音？",opts:["Cake", "Cat", "Bag", "Sun"],correct:0,icon:"cheese"},{q:"哪一個字有默音e令i讀長音？",opts:["Bike", "Big", "Dog", "Bus"],correct:0,icon:"runner"},{q:"哪一個字有默音e令o讀長音？",opts:["Home", "Dog", "Cat", "Bag"],correct:0,icon:"familyhouse"},{q:"哪一個字有默音e令u讀長音？",opts:["Cute", "Sun", "Bus", "Cat"],correct:0,icon:"chick"},{q:"哪一個字有默音e令i讀長音（表示時鐘）？",opts:["Time", "Dog", "Bag", "Sun"],correct:0,icon:"watch_clock"},{q:"「Cap」加上默音e會變成甚麼字？",opts:["Cape", "Cat", "Bag", "Sun"],correct:0,icon:"cheese"},{q:"「Rid」加上默音e會變成甚麼字？",opts:["Ride", "Dog", "Bus", "Cat"],correct:0,icon:"runner"},{q:"「Rob」加上默音e會變成甚麼字？",opts:["Robe", "Dog", "Cat", "Sun"],correct:0,icon:"familyhouse"},{q:"哪一個字讀音是 /keɪk/？",opts:["Cake", "Cak", "Cat", "Cap"],correct:0,icon:"cheese"},{q:"哪一個字讀音是 /baɪk/？",opts:["Bike", "Bik", "Big", "Bit"],correct:0,icon:"runner"}]}
+];
+const VOCAB_UNITS = [
+{id:"vocab_u1",tier:1,stars:1,name:"詞彙第一關：上學用品 School Items",goal:6,time:45,preview:[{word:"Schoolbag",icon:"schoolbag",meaning:"書包"},{word:"Ruler",icon:"ruler",meaning:"尺"},{word:"Pencil case",icon:"pencilcase",meaning:"筆盒"},{word:"Book",icon:"book",meaning:"書"},{word:"Classmate",icon:"classmates",meaning:"同學"}],questions:[{q:"上學時需要攜帶的物品是甚麼？",opts:["Schoolbag", "Banana", "Ferry", "Umbrella"],correct:0,icon:"schoolbag"},{q:"用來量度長度的文具稱為甚麼？",opts:["Ruler", "Pen", "Book", "Bag"],correct:0,icon:"ruler"},{q:"筆盒裡通常放置的物品是甚麼？",opts:["Pencils and erasers", "Fruit", "Shoes", "Milk"],correct:0,icon:"pencilcase"},{q:"我們閱讀和溫習的地方稱為甚麼？",opts:["Library", "Playground", "Kitchen", "Garage"],correct:0,icon:"book"},{q:"與你一起上課的人稱為甚麼？",opts:["Teacher", "Classmate", "Doctor", "Driver"],correct:1,icon:"classmates"},{q:"教導我們知識的人稱為甚麼？",opts:["Teacher", "Classmate", "Driver", "Doctor"],correct:0,icon:"teacher"},{q:"我們可以借閱圖書的地方是甚麼？",opts:["Library", "Hospital", "Park", "Shop"],correct:0,icon:"book"},{q:"書包內通常裝有甚麼物品前往學校？",opts:["Books and pencil case", "Clothes only", "Food only", "Toys only"],correct:0,icon:"schoolbag"},{q:"用來寫字和畫畫的文具是甚麼？",opts:["Pen", "Ball", "Bag", "Ferry"],correct:0,icon:"pencilcase"},{q:"筆盒通常用來裝甚麼物品？",opts:["Pencils and erasers", "Clothes", "Shoes", "Food"],correct:0,icon:"pencilcase"}]},
+{id:"vocab_u2",tier:2,stars:1,name:"詞彙第二關：交通工具 Transport",goal:6,time:45,preview:[{word:"Minibus",icon:"minibus",meaning:"小巴"},{word:"Ferry",icon:"ferry",meaning:"渡輪"},{word:"MTR",icon:"mtr",meaning:"地鐵"},{word:"Taxi",icon:"taxi",meaning:"的士"}],questions:[{q:"前往香港島可以乘搭甚麼交通工具？",opts:["Minibus", "Ferry", "Aeroplane", "Bicycle"],correct:1,icon:"ferry"},{q:"這是香港的地下鐵路，稱為甚麼？",opts:["MTR", "Bus", "Taxi", "Tram"],correct:0,icon:"mtr"},{q:"香港常見的公共交通工具是甚麼？",opts:["Minibus", "Camel", "Horse", "Sled"],correct:0,icon:"minibus"},{q:"過海時可以乘搭的交通工具是甚麼？",opts:["Ferry", "Camel", "Sled", "Horse"],correct:0,icon:"ferry"},{q:"香港最便利的地底交通工具稱為甚麼？",opts:["MTR", "Sled", "Camel", "Canoe"],correct:0,icon:"mtr"},{q:"哪一種交通工具航行於海上？",opts:["Ferry", "MTR", "Minibus", "Bicycle"],correct:0,icon:"ferry"},{q:"街上可以招手截停的交通工具是甚麼？",opts:["Taxi", "MTR", "Ferry", "Aeroplane"],correct:0,icon:"taxi"},{q:"我們探訪醫生時可能會前往哪裡？",opts:["Hospital", "Library", "Playground", "Bank"],correct:0,icon:"hospital"}]},
+{id:"vocab_u3",tier:3,stars:2,name:"詞彙第三關：香港美食 Hong Kong Food",goal:7,time:50,preview:[{word:"Dim Sum",icon:"dimsum",meaning:"點心"},{word:"Egg Waffle",icon:"eggwaffle",meaning:"雞蛋仔"},{word:"Milk Tea",icon:"milktea",meaning:"奶茶"},{word:"Bread",icon:"bread",meaning:"麵包"},{word:"Apple",icon:"apple",meaning:"蘋果"}],questions:[{q:"這是茶樓常見的食物，稱為甚麼？",opts:["Dim Sum", "Pizza", "Burger", "Cake"],correct:0,icon:"dimsum"},{q:"這是香港街頭常見的小食，稱為甚麼？",opts:["Egg Waffle", "Bread", "Rice", "Noodle"],correct:0,icon:"eggwaffle"},{q:"這是香港人喜愛的飲品，稱為甚麼？",opts:["Milk Tea", "Juice", "Water", "Soda"],correct:0,icon:"milktea"},{q:"星期日在茶樓常見的食物稱為甚麼？",opts:["Dim Sum", "Steak", "Pasta", "Salad"],correct:0,icon:"dimsum"},{q:"街頭小食店常見的甜點稱為甚麼？",opts:["Egg Waffle", "Sushi", "Taco", "Pie"],correct:0,icon:"eggwaffle"},{q:"香港茶餐廳常見的飲品是甚麼？",opts:["Milk Tea", "Coconut Water", "Wine", "Beer"],correct:0,icon:"milktea"},{q:"我們早餐常吃的食物是甚麼？",opts:["Bread", "Dim Sum", "Milk Tea", "Egg Waffle"],correct:0,icon:"bread"},{q:"我們常吃的蘋果是甚麼顏色？",opts:["Red", "Blue", "Black", "Purple"],correct:0,icon:"apple"},{q:"這是甚麼水果？",opts:["Apple", "Banana", "Orange", "Grape"],correct:0,icon:"apple"},{q:"這種橙色的水果稱為甚麼？",opts:["Orange", "Apple", "Banana", "Grape"],correct:0,icon:"orange_fruit"}]},
+{id:"vocab_u4",tier:4,stars:2,name:"詞彙第四關：家庭與動物 Family & Animals",goal:7,time:50,preview:[{word:"Family",icon:"familyhouse",meaning:"家庭"},{word:"House",icon:"familyhouse",meaning:"房屋"},{word:"Cat",icon:"cat",meaning:"貓"},{word:"Dog",icon:"dog",meaning:"狗"},{word:"Bird",icon:"bird",meaning:"小鳥"}],questions:[{q:"我們與家人一起居住的地方稱為甚麼？",opts:["House", "School", "Park", "Library"],correct:0,icon:"familyhouse"},{q:"與我們一起在家中居住的人稱為甚麼？",opts:["Family", "Teacher", "Stranger", "Classmate"],correct:0,icon:"familyhouse"},{q:"這種動物的名稱是甚麼？",opts:["Cat", "Dog", "Bird", "Fish"],correct:0,icon:"cat"},{q:"這種動物是人類的好朋友，稱為甚麼？",opts:["Cat", "Dog", "Rabbit", "Duck"],correct:1,icon:"dog"},{q:"這是甚麼動物的圖像？",opts:["Dog", "Cat", "Bird", "Fish"],correct:0,icon:"dog"},{q:"這是我們日常居住的建築物，稱為甚麼？",opts:["House", "Ferry", "MTR", "Slide"],correct:0,icon:"familyhouse"},{q:"這種會飛的小動物稱為甚麼？",opts:["Bird", "Dog", "Cat", "Fish"],correct:0,icon:"bird"},{q:"我們在學校內認識的朋友稱為甚麼？",opts:["Classmate", "Stranger", "Neighbour", "Customer"],correct:0,icon:"classmates"}]},
+{id:"vocab_u5",tier:5,stars:3,name:"詞彙第五關：公園與天氣 Park & Weather",goal:8,time:55,preview:[{word:"Slide",icon:"slide",meaning:"滑梯"},{word:"Ball",icon:"ball",meaning:"球"},{word:"Sun",icon:"sun",meaning:"太陽"},{word:"Cloud",icon:"cloud",meaning:"雲"},{word:"Rain",icon:"rain",meaning:"雨"}],questions:[{q:"在公園裡可以玩耍的設施是甚麼？",opts:["Slide", "Book", "Ruler", "Bus"],correct:0,icon:"slide"},{q:"用來踢或拍打的圓形物件稱為甚麼？",opts:["Ball", "Book", "Bag", "Ruler"],correct:0,icon:"ball"},{q:"天空中發光發熱的天體是甚麼？",opts:["Moon", "Sun", "Star", "Cloud"],correct:1,icon:"sun"},{q:"每天早上升起的天體是甚麼？",opts:["Sun", "Moon", "Star", "Cloud"],correct:0,icon:"sun"},{q:"天空中白色軟綿綿的東西稱為甚麼？",opts:["Cloud", "Sun", "Moon", "Star"],correct:0,icon:"cloud"},{q:"下雨天需要帶的物品是甚麼？",opts:["Umbrella", "Ruler", "Ball", "Book"],correct:0,icon:"umbrella"},{q:"晚上在天空發光的圓形天體稱為甚麼？",opts:["Moon", "Sun", "Cloud", "Star"],correct:0,icon:"moon"},{q:"夜空中閃爍的細小光點稱為甚麼？",opts:["Star", "Moon", "Sun", "Cloud"],correct:0,icon:"star"},{q:"放學後可以前往哪裡玩滑梯？",opts:["Playground", "Hospital", "Office", "Bank"],correct:0,icon:"playground_scene"}]},
+{id:"vocab_u6",tier:6,stars:3,name:"詞彙第六關：情緒與感覺 Feelings (P2)",goal:8,time:55,preview:[{word:"Happy",icon:"happy",meaning:"開心"},{word:"Sad",icon:"sad",meaning:"傷心"},{word:"Tired",icon:"sad",meaning:"疲倦"},{word:"Excited",icon:"happy",meaning:"興奮"},{word:"Scared",icon:"sad",meaning:"驚慌"}],questions:[{q:"考試得到滿分時的心情是甚麼？",opts:["Happy", "Sad", "Tired", "Scared"],correct:0,icon:"happy"},{q:"弄丟心愛玩具時的心情是甚麼？",opts:["Sad", "Happy", "Excited", "Cute"],correct:0,icon:"sad"},{q:"跑步很久之後身體感覺如何？",opts:["Tired", "Happy", "Excited", "Cute"],correct:0,icon:"sad"},{q:"即將去迪士尼樂園時的心情是甚麼？",opts:["Excited", "Sad", "Tired", "Angry"],correct:0,icon:"happy"},{q:"看到怪獸電影時可能感覺怎樣？",opts:["Scared", "Happy", "Cute", "Tired"],correct:0,icon:"sad"},{q:"與朋友玩耍時通常感覺怎樣？",opts:["Happy", "Sad", "Scared", "Tired"],correct:0,icon:"happy"},{q:"生病時身體通常感覺怎樣？",opts:["Tired", "Excited", "Happy", "Cute"],correct:0,icon:"sad"},{q:"收到生日禮物時心情如何？",opts:["Happy", "Sad", "Scared", "Tired"],correct:0,icon:"happy"},{q:"哪一個字用來形容小狗小貓可愛？",opts:["Cute", "Sad", "Scared", "Tired"],correct:0,icon:"chick"}]},
+{id:"vocab_u7",tier:7,stars:3,name:"詞彙第七關：日常動作 Daily Actions (P2)",goal:8,time:55,preview:[{word:"Run",icon:"runner",meaning:"跑"},{word:"Jump",icon:"jumper",meaning:"跳"},{word:"Swim",icon:"whale",meaning:"游泳"},{word:"Read",icon:"book",meaning:"閱讀"},{word:"Write",icon:"pencilcase",meaning:"寫字"}],questions:[{q:"用雙腳快速移動的動作稱為甚麼？",opts:["Run", "Swim", "Read", "Sleep"],correct:0,icon:"runner"},{q:"雙腳離地跳起的動作稱為甚麼？",opts:["Jump", "Run", "Write", "Eat"],correct:0,icon:"jumper"},{q:"在水中活動的動作稱為甚麼？",opts:["Swim", "Jump", "Run", "Sleep"],correct:0,icon:"whale"},{q:"看書認字的動作稱為甚麼？",opts:["Read", "Swim", "Jump", "Run"],correct:0,icon:"book"},{q:"用筆記下文字的動作稱為甚麼？",opts:["Write", "Read", "Swim", "Jump"],correct:0,icon:"pencilcase"},{q:"用嘴巴進食的動作稱為甚麼？",opts:["Eat", "Run", "Write", "Swim"],correct:0,icon:"cheese"},{q:"閉上眼睛休息的動作稱為甚麼？",opts:["Sleep", "Run", "Jump", "Eat"],correct:0,icon:"sad"},{q:"用手拿起物件的動作稱為甚麼？",opts:["Hold", "Run", "Swim", "Sleep"],correct:0,icon:"thumb"},{q:"每天早上洗臉刷牙前會先做甚麼？",opts:["Wake up", "Sleep", "Swim", "Jump"],correct:0,icon:"sun"}]},
+{id:"vocab_u8",tier:8,stars:3,name:"詞彙第八關：星期與數字 Days & Numbers (P2)",goal:9,time:60,preview:[{word:"Monday",icon:"watch_clock",meaning:"星期一"},{word:"Five",icon:"number_five",meaning:"五"},{word:"Ten",icon:"number_five",meaning:"十"},{word:"Yesterday",icon:"watch_clock",meaning:"昨天"},{word:"Tomorrow",icon:"sun",meaning:"明天"}],questions:[{q:"一星期的第一個上學日稱為甚麼？",opts:["Monday", "Sunday", "Saturday", "Friday"],correct:0,icon:"watch_clock"},{q:"一星期中最後一天（假日）稱為甚麼？",opts:["Sunday", "Monday", "Tuesday", "Wednesday"],correct:0,icon:"sun"},{q:"數字「5」用英文怎樣寫？",opts:["Five", "Four", "Six", "Seven"],correct:0,icon:"number_five"},{q:"數字「10」用英文怎樣寫？",opts:["Ten", "Nine", "Eleven", "Eight"],correct:0,icon:"number_five"},{q:"「昨天」用英文怎樣說？",opts:["Yesterday", "Tomorrow", "Today", "Tonight"],correct:0,icon:"watch_clock"},{q:"「明天」用英文怎樣說？",opts:["Tomorrow", "Yesterday", "Today", "Tonight"],correct:0,icon:"sun"},{q:"一星期總共有多少天？",opts:["Seven", "Five", "Six", "Eight"],correct:0,icon:"watch_clock"},{q:"數字「3」加「2」等於甚麼？",opts:["Five", "Four", "Six", "Seven"],correct:0,icon:"number_five"},{q:"「今天」用英文怎樣說？",opts:["Today", "Yesterday", "Tomorrow", "Tonight"],correct:0,icon:"sun"},{q:"星期六和星期日合稱為甚麼？",opts:["Weekend", "Weekday", "Holiday", "Morning"],correct:0,icon:"watch_clock"}]}
+];
+const READING_UNITS = [
+{id:"reading_u1",tier:1,stars:1,name:"閱讀第一關：上學日常 Going to School",goal:3,time:60,preview:[{word:"go to school",icon:"minibus",meaning:"上學"},{word:"schoolbag",icon:"schoolbag",meaning:"書包"},{word:"every morning",icon:"sun",meaning:"每天早上"}],questions:[{passage:"Tom goes to school by minibus every morning. He carries his schoolbag with his book and pencil case.",q:"How does Tom go to school?",opts:["By minibus", "By ferry", "By bicycle", "By MTR"],correct:0,icon:"minibus"},{passage:"Every morning, I put my ruler and pencil case into my schoolbag before going to school.",q:"What does the child put into the schoolbag?",opts:["Ruler and pencil case", "Milk tea and bread", "Ball and slide", "Dog and cat"],correct:0,icon:"schoolbag"},{passage:"My mother packs my schoolbag with a ruler, a pencil case, and my English book every night.",q:"When does mother pack the schoolbag?",opts:["Every night", "Every morning", "Every weekend", "Every holiday"],correct:0,icon:"schoolbag"},{passage:"At school, my teacher gives me a ruler to measure my book. I put it back in my pencil case.",q:"What does the child use to measure the book?",opts:["A ruler", "A ball", "A bag", "A dog"],correct:0,icon:"ruler"},{passage:"My classmates and I read books in the school library every Friday afternoon.",q:"When do they read books?",opts:["Friday afternoon", "Monday morning", "Sunday evening", "Saturday night"],correct:0,icon:"book"},{passage:"Every Saturday, my brother and I visit the library to borrow new storybooks together.",q:"What do they borrow from the library?",opts:["Storybooks", "Toys", "Food", "Clothes"],correct:0,icon:"book"}]},
+{id:"reading_u2",tier:2,stars:1,name:"閱讀第二關：假日出遊 Weekend Outing",goal:3,time:60,preview:[{word:"take the ferry",icon:"ferry",meaning:"搭渡輪"},{word:"dim sum",icon:"dimsum",meaning:"點心"},{word:"family",icon:"familyhouse",meaning:"家庭"}],questions:[{passage:"On Sunday, my family and I take the ferry to Hong Kong Island. We eat dim sum for lunch.",q:"What do they eat for lunch?",opts:["Dim sum", "Egg waffle", "Pizza", "Bread"],correct:0,icon:"dimsum"},{passage:"On Saturday, my father and I take the ferry to see the sea. We enjoy the sunshine.",q:"What do they take to see the sea?",opts:["The ferry", "The MTR", "The minibus", "The bicycle"],correct:0,icon:"ferry"},{passage:"Every Sunday morning, my family takes the ferry across the harbour to visit my aunt.",q:"When do they take the ferry?",opts:["Sunday morning", "Monday evening", "Saturday night", "Friday afternoon"],correct:0,icon:"ferry"},{passage:"After lunch, my family often orders dim sum and enjoys the warm tea at our favourite restaurant.",q:"What does the family order after lunch?",opts:["Dim sum", "Egg waffle", "Milk tea only", "Fruit"],correct:0,icon:"dimsum"},{passage:"We take the MTR to visit my grandmother every weekend. She lives near the park.",q:"How do they visit grandmother?",opts:["By MTR", "By ferry", "By minibus", "By taxi"],correct:0,icon:"mtr"},{passage:"My grandfather lives in a house near the MTR station, so we visit him easily every Sunday.",q:"Where does grandfather live?",opts:["Near the MTR station", "On a boat", "In the library", "At school"],correct:0,icon:"mtr"}]},
+{id:"reading_u3",tier:3,stars:2,name:"閱讀第三關：放學生活 After School Life",goal:4,time:75,preview:[{word:"after school",icon:"slide",meaning:"放學後"},{word:"playground",icon:"playground_scene",meaning:"遊樂場"},{word:"egg waffle",icon:"eggwaffle",meaning:"雞蛋仔"}],questions:[{passage:"Amy likes to play on the slide at the playground with her classmates after school.",q:"Where does Amy play?",opts:["At the playground", "At the library", "At home", "At the MTR station"],correct:0,icon:"slide"},{passage:"After school, Ben buys an egg waffle and a cup of milk tea from the shop near his house.",q:"What does Ben buy?",opts:["Egg waffle and milk tea", "Dim sum and juice", "Bread and water", "Rice and tea"],correct:0,icon:"eggwaffle"},{passage:"During recess, my classmates and I share an egg waffle and talk about our favourite games.",q:"What do they share during recess?",opts:["An egg waffle", "A ball", "A book", "A ruler"],correct:0,icon:"eggwaffle"},{passage:"On sunny afternoons, my friends and I like to slide down the playground slide many times.",q:"What do they do on sunny afternoons?",opts:["Slide down the playground slide", "Read in the library", "Take the ferry", "Eat dim sum"],correct:0,icon:"slide"},{passage:"My classmates and I play ball games at the playground every recess time.",q:"When do they play ball games?",opts:["Recess time", "Bedtime", "Dinner time", "Study time"],correct:0,icon:"ball"},{passage:"On hot summer days, my family enjoys drinking cold milk tea at the tea restaurant nearby.",q:"What do they drink on hot days?",opts:["Cold milk tea", "Hot soup", "Warm water", "Coffee"],correct:0,icon:"milktea"}]},
+{id:"reading_u4",tier:4,stars:3,name:"閱讀第四關：家中生活 Life at Home",goal:4,time:75,preview:[{word:"pet",icon:"cat",meaning:"寵物"},{word:"feed",icon:"dog",meaning:"餵食"},{word:"every evening",icon:"sun",meaning:"每晚"}],questions:[{passage:"I have a pet dog. My dog is brown. I play with my dog in the park every evening.",q:"What colour is the dog?",opts:["Brown", "Black", "White", "Grey"],correct:0,icon:"dog"},{passage:"My cat likes to sleep on my bed. Every day after school, I feed my cat and play with it.",q:"What does the child do after school?",opts:["Feed and play with the cat", "Go to the library", "Take the MTR", "Eat dim sum"],correct:0,icon:"cat"},{passage:"My little sister loves to feed our pet dog every afternoon after she comes home from school.",q:"Who feeds the pet dog?",opts:["Little sister", "Grandfather", "Teacher", "Classmate"],correct:0,icon:"dog"},{passage:"My family lives in a small house near the park. I like to play with my ball there.",q:"Where is the house located?",opts:["Near the park", "Near the library", "On a boat", "In the sky"],correct:0,icon:"familyhouse"},{passage:"On my way to school, I see the sun shining brightly in the sky. It makes me happy.",q:"What does the child see in the sky?",opts:["The sun", "The moon", "A bird", "A plane"],correct:0,icon:"sun"},{passage:"My mother buys apples and bananas from the market. I eat an apple every morning.",q:"What does the child eat every morning?",opts:["An apple", "A banana", "Dim sum", "An egg waffle"],correct:0,icon:"apple"},{passage:"I keep my pencils and eraser neatly inside my pencil case so I do not lose them at school.",q:"Where does the child keep the pencils?",opts:["Inside the pencil case", "Inside the schoolbag", "On the desk", "In the library"],correct:0,icon:"pencilcase"}]},
+{id:"reading_u5",tier:5,stars:3,name:"閱讀第五關：情緒故事 Feelings Story (P2)",goal:4,time:75,preview:[{word:"happy",icon:"happy",meaning:"開心"},{word:"scared",icon:"sad",meaning:"驚慌"},{word:"excited",icon:"happy",meaning:"興奮"}],questions:[{passage:"Lily felt very excited because she was going to Disneyland with her family this weekend.",q:"Why did Lily feel excited?",opts:["Going to Disneyland", "Losing her toy", "Being sick", "Doing homework"],correct:0,icon:"happy"},{passage:"Tom was scared when he watched the monster movie last night. He hid under his blanket.",q:"What did Tom do when he was scared?",opts:["Hid under his blanket", "Went to school", "Ate dinner", "Played football"],correct:0,icon:"sad"},{passage:"After winning the race, Amy felt very happy and proud of herself. She smiled all day.",q:"How did Amy feel after winning?",opts:["Happy and proud", "Sad and tired", "Scared and worried", "Angry and upset"],correct:0,icon:"happy"},{passage:"Ben felt tired after swimming for two hours. He wanted to rest and drink some water.",q:"Why did Ben feel tired?",opts:["Swimming for two hours", "Reading a book", "Sleeping all day", "Eating breakfast"],correct:0,icon:"sad"},{passage:"When Kate saw her new puppy, she felt so happy that she hugged it right away.",q:"What did Kate do when she saw the puppy?",opts:["Hugged it right away", "Ran away", "Cried loudly", "Fell asleep"],correct:0,icon:"happy"},{passage:"My little brother was sad because he lost his favourite toy car at the playground.",q:"Why was the little brother sad?",opts:["He lost his toy car", "He won a prize", "He ate ice cream", "He went swimming"],correct:0,icon:"sad"},{passage:"We felt excited when the teacher said we would go on a school trip next Friday.",q:"When is the school trip?",opts:["Next Friday", "Yesterday", "This morning", "Last week"],correct:0,icon:"happy"}]},
+{id:"reading_u6",tier:6,stars:3,name:"閱讀第六關：一週活動 Weekly Activities (P2)",goal:4,time:75,preview:[{word:"Monday",icon:"watch_clock",meaning:"星期一"},{word:"swim",icon:"whale",meaning:"游泳"},{word:"weekend",icon:"sun",meaning:"週末"}],questions:[{passage:"On Monday, I go to school and study English. On Wednesday, I swim with my classmates after class.",q:"What does the child do on Wednesday?",opts:["Swim with classmates", "Go to the library", "Visit grandmother", "Eat dim sum"],correct:0,icon:"whale"},{passage:"Every Saturday morning, my family and I run in the park before breakfast.",q:"When does the family run in the park?",opts:["Saturday morning", "Sunday night", "Monday evening", "Friday afternoon"],correct:0,icon:"runner"},{passage:"On the weekend, my brother likes to jump on the trampoline while I read my storybooks.",q:"What does the brother like to do on weekends?",opts:["Jump on the trampoline", "Read storybooks", "Swim in the pool", "Write letters"],correct:0,icon:"jumper"},{passage:"My class has an English test every Friday. I always study hard on Thursday night.",q:"When does the child study hard?",opts:["Thursday night", "Friday morning", "Monday evening", "Sunday afternoon"],correct:0,icon:"watch_clock"},{passage:"Yesterday, I wrote a letter to my grandmother. Tomorrow, I will visit her with my family.",q:"What will the child do tomorrow?",opts:["Visit grandmother", "Write another letter", "Go swimming", "Play football"],correct:0,icon:"watch_clock"},{passage:"There are seven days in a week. My favourite day is Saturday because I can play all day.",q:"Why does the child like Saturday?",opts:["Can play all day", "Has to study", "Must go to school", "Feels tired"],correct:0,icon:"sun"},{passage:"After school on Tuesday, I read a new book about whales and fish in the sea.",q:"What is the new book about?",opts:["Whales and fish", "Dogs and cats", "Cars and trains", "Fruits and food"],correct:0,icon:"whale"}]},
+{id:"reading_u7",tier:7,stars:3,name:"閱讀第七關：短文推理 Story Inference (P2)",goal:5,time:80,preview:[{word:"because",icon:"happy",meaning:"因為"},{word:"suddenly",icon:"sad",meaning:"突然"},{word:"quickly",icon:"runner",meaning:"快速地"}],questions:[{passage:"Sam ran quickly to catch the minibus because he was late for school. He arrived just in time.",q:"Why did Sam run quickly?",opts:["He was late for school", "He wanted exercise", "He lost his bag", "He was playing a game"],correct:0,icon:"runner"},{passage:"The sky turned dark and it started to rain suddenly. Mia opened her umbrella quickly.",q:"What did Mia do when it rained?",opts:["Opened her umbrella", "Ran home crying", "Went swimming", "Ate an egg waffle"],correct:0,icon:"umbrella"},{passage:"Jack felt scared because the room was very dark. He turned on the light quickly and felt better.",q:"Why did Jack feel scared?",opts:["The room was dark", "He was hungry", "He lost his toy", "He was late"],correct:0,icon:"sad"},{passage:"Because it was very hot, my family bought cold milk tea and sat under a big tree.",q:"Why did the family buy cold milk tea?",opts:["It was very hot", "It was raining", "It was cold", "It was nighttime"],correct:0,icon:"milktea"},{passage:"Emma studied hard every night because she wanted to get a good grade in the English test.",q:"Why did Emma study hard?",opts:["To get a good grade", "To play games", "To watch TV", "To sleep early"],correct:0,icon:"book"},{passage:"The little chick suddenly ran to its mother when it heard a loud noise nearby.",q:"Why did the chick run to its mother?",opts:["It heard a loud noise", "It was hungry", "It wanted to swim", "It was sleepy"],correct:0,icon:"chick"},{passage:"Because the classroom was messy, the teacher asked all students to clean it up quickly.",q:"Why did the teacher ask students to clean up?",opts:["The classroom was messy", "It was time to eat", "It was raining", "It was a holiday"],correct:0,icon:"table"}]}
+];
+const CATEGORY_META = {
+  phonics: {name:"拼音礦洞 Phonics Rush", cls:"phonics", units:PHONICS_UNITS, icon:"cat", desc:"訓練英文拼讀規則，由小一首尾音到小二連音、雙字母音及默音e"},
+  vocab: {name:"生活詞彙礦洞 Vocab Blitz", cls:"vocab", units:VOCAB_UNITS, icon:"schoolbag", desc:"由小一生活場景詞彙進階至小二情緒、動作、日期詞彙"},
+  reading: {name:"閱讀礦洞 Reading Quest", cls:"reading", units:READING_UNITS, icon:"book", desc:"由簡單句子理解進階至小二因果推理短文"}
 };
 
-/* ============ CORE VOCAB / PHONICS DATA (HK life themes) ============ */
-const PHONICS_BANK = [
-  {q:"哪一個字的發音是 /k-a-t/？", opts:["Cat","Cap","Can","Cup"], correct:0, icon:"cat", difficulty:1},
-  {q:"哪一個字的首音與「Ball」相同？", opts:["Bag","Sun","Egg","Ant"], correct:0, icon:"ball", difficulty:1},
-  {q:"哪一個字的發音是 /s-u-n/？", opts:["Run","Sun","Fun","Bun"], correct:1, icon:"sun", difficulty:1},
-  {q:"哪一個字的首音與「Dog」相同？", opts:["Bus","Dig","Cup","Map"], correct:1, icon:"dog", difficulty:1},
-  {q:"哪一個字的首音與「Bag」相同？", opts:["Bus","Cat","Sun","Pen"], correct:0, icon:"schoolbag", difficulty:1},
-  {q:"哪一個字的尾音與「Cat」相同？", opts:["Hat","Cap","Can","Car"], correct:0, icon:"cat", difficulty:1},
-  {q:"哪一個字的首音與「Ferry」相同？", opts:["Fan","Bus","Dog","Cat"], correct:0, icon:"ferry", difficulty:1},
-  {q:"哪一個字的首音與「MTR」相同？", opts:["Bus","Map","Cat","Sun"], correct:1, icon:"mtr", difficulty:1},
-  {q:"哪一個字的首音與「Ruler」相同？", opts:["Run","Ball","Dog","Bag"], correct:0, icon:"ruler", difficulty:1},
-  {q:"哪一個字的首音與「House」相同？", opts:["Hat","Cat","Bus","Sun"], correct:0, icon:"familyhouse", difficulty:1},
-  {q:"哪一個字的發音是 /d-o-g/？", opts:["Dig","Dog","Log","Fog"], correct:1, icon:"dog", difficulty:1},
-  {q:"哪一個字的發音是 /b-u-s/？", opts:["Bus","Bag","Bin","Bat"], correct:0, icon:"minibus", difficulty:1},
-  {q:"哪一個字與「Cat」押韻？", opts:["Hat","Dog","Sun","Bus"], correct:0, icon:"cat", difficulty:1},
-  {q:"哪一個字與「Sun」押韻？", opts:["Cat","Fun","Dog","Bag"], correct:1, icon:"sun", difficulty:1},
-  {q:"哪一個字的發音是 /p-e-n/？", opts:["Pin","Pen","Pan","Pun"], correct:1, icon:"ruler", difficulty:1},
-  {q:"哪一個字的發音是 /b-a-g/？", opts:["Big","Bag","Bug","Beg"], correct:1, icon:"schoolbag", difficulty:1},
-  {q:"哪一個字的尾音與「Ball」相同？", opts:["Wall","Bus","Cat","Sun"], correct:0, icon:"ball", difficulty:2},
-  {q:"哪一個字的發音是 /m-a-p/？", opts:["Map","Mop","Mup","Mip"], correct:0, icon:"mtr", difficulty:2},
-  {q:"哪一個字的中間音與「Cat」相同？", opts:["Bag","Dog","Sun","Bus"], correct:0, icon:"schoolbag", difficulty:2},
-  {q:"哪一個字的發音是 /f-u-n/？", opts:["Fun","Fin","Fan","Fon"], correct:0, icon:"ball", difficulty:2},
-  {q:"哪一個字的首音與「Egg」相同？", opts:["Elephant","Cat","Dog","Bus"], correct:0, icon:"apple", difficulty:2},
-  {q:"哪一個字的發音是 /h-a-t/？", opts:["Hot","Hat","Hit","Hut"], correct:1, icon:"familyhouse", difficulty:2},
-  {q:"哪一個字的發音是 /b-i-g/？", opts:["Bag","Big","Bug","Beg"], correct:1, icon:"schoolbag", difficulty:2},
-  {q:"哪一個字的尾音與「Dog」相同？", opts:["Log","Bag","Bus","Sun"], correct:0, icon:"dog", difficulty:2},
-  {q:"哪一個字的發音是 /r-u-n/？", opts:["Ran","Run","Ren","Rin"], correct:1, icon:"ruler", difficulty:2},
-  {q:"哪一個字的首音與「Apple」相同？", opts:["Ant","Bus","Cat","Dog"], correct:0, icon:"apple", difficulty:2},
-  {q:"哪一個字的發音是 /c-u-p/？", opts:["Cap","Cup","Cop","Cip"], correct:1, icon:"milktea", difficulty:2},
-  {q:"哪一個字與「Bag」押韻？", opts:["Tag","Dog","Sun","Bus"], correct:0, icon:"schoolbag", difficulty:2},
-  {q:"哪一個字的發音是 /t-o-p/？", opts:["Tap","Tip","Top","Tup"], correct:2, icon:"slide", difficulty:2},
-  {q:"哪一個字的尾音與「Sun」相同？", opts:["Fan","Fun","Sit","Bus"], correct:1, icon:"sun", difficulty:2},
-  {q:"哪一個字的發音是 /b-e-d/？", opts:["Bed","Bad","Bud","Bid"], correct:0, icon:"familyhouse", difficulty:2},
-  {q:"哪一個字的發音是 /p-i-g/？", opts:["Pig","Peg","Pug","Pag"], correct:0, icon:"dog", difficulty:2},
-  {q:"哪一個字的首音與「Cup」相同？", opts:["Cat","Dog","Sun","Bus"], correct:0, icon:"milktea", difficulty:3},
-  {q:"哪一個字的發音是 /l-e-g/？", opts:["Log","Leg","Lag","Lig"], correct:1, icon:"ball", difficulty:3},
-  {q:"哪一個字與「Pen」押韻？", opts:["Ten","Pan","Pin","Pun"], correct:0, icon:"ruler", difficulty:3},
-  {q:"哪一個字的發音是 /j-a-m/？", opts:["Jam","Jim","Jom","Jum"], correct:0, icon:"apple", difficulty:3},
-  {q:"哪一個字的首音與「Fan」相同？", opts:["Fun","Bus","Cat","Sun"], correct:0, icon:"ferry", difficulty:3},
-  {q:"哪一個字的發音是 /w-e-t/？", opts:["Wet","Wit","Wat","Wut"], correct:0, icon:"sun", difficulty:3},
-  {q:"哪一個字的尾音與「Map」相同？", opts:["Cap","Cat","Bus","Sun"], correct:0, icon:"mtr", difficulty:3},
-  {q:"哪一個字的發音是 /h-e-n/？", opts:["Hen","Hin","Han","Hun"], correct:0, icon:"familyhouse", difficulty:3},
-  {q:"哪一個字與「Dog」押韻？", opts:["Fog","Cat","Sun","Bus"], correct:0, icon:"dog", difficulty:3},
-  {q:"哪一個字的發音是 /k-i-d/？", opts:["Kid","Kad","Kud","Ked"], correct:0, icon:"classmates", difficulty:3},
-  {q:"哪一個字的首音與「Sun」相同？", opts:["Sit","Bus","Cat","Dog"], correct:0, icon:"sun", difficulty:3},
-  {q:"哪一個字的發音是 /n-e-t/？", opts:["Net","Nat","Nit","Nut"], correct:0, icon:"ball", difficulty:3},
-  {q:"哪一個字的尾音與「Pen」相同？", opts:["Ten","Tap","Tip","Top"], correct:0, icon:"ruler", difficulty:3},
-  {q:"哪一個字的發音是 /v-a-n/？", opts:["Van","Ven","Vin","Von"], correct:0, icon:"minibus", difficulty:3},
-  {q:"哪一個字的首音與「Library」相同？", opts:["Log","Bus","Cat","Sun"], correct:0, icon:"book", difficulty:3},
-  {q:"哪一個字的發音是 /z-i-p/？", opts:["Zip","Zap","Zop","Zup"], correct:0, icon:"schoolbag", difficulty:3},
-  {q:"哪一個字與「Big」押韻？", opts:["Pig","Bag","Sun","Bus"], correct:0, icon:"dog", difficulty:3},
-  {q:"哪一個字的發音是 /r-e-d/？", opts:["Red","Rid","Rad","Rud"], correct:0, icon:"apple", difficulty:3},
-];
-const VOCAB_BANK = [
-  {q:"上學時需要攜帶的物品是甚麼？", opts:["Schoolbag","Banana","Ferry","Umbrella"], correct:0, icon:"schoolbag", difficulty:1},
-  {q:"前往香港島可以乘搭甚麼交通工具？", opts:["Minibus","Ferry","Aeroplane","Bicycle"], correct:1, icon:"ferry", difficulty:1},
-  {q:"這是香港的地下鐵路，稱為甚麼？", opts:["MTR","Bus","Taxi","Tram"], correct:0, icon:"mtr", difficulty:1},
-  {q:"這是茶樓常見的食物，稱為甚麼？", opts:["Dim Sum","Pizza","Burger","Cake"], correct:0, icon:"dimsum", difficulty:1},
-  {q:"這是香港街頭常見的小食，稱為甚麼？", opts:["Egg Waffle","Bread","Rice","Noodle"], correct:0, icon:"eggwaffle", difficulty:1},
-  {q:"這是香港人喜愛的飲品，稱為甚麼？", opts:["Milk Tea","Juice","Water","Soda"], correct:0, icon:"milktea", difficulty:1},
-  {q:"在公園裡可以玩耍的設施是甚麼？", opts:["Slide","Book","Ruler","Bus"], correct:0, icon:"slide", difficulty:1},
-  {q:"筆盒裡通常放置的物品是甚麼？", opts:["Pencils and erasers","Fruit","Shoes","Milk"], correct:0, icon:"pencilcase", difficulty:1},
-  {q:"上課時使用的文具是甚麼？", opts:["Ruler","Ferry","Dog","Sun"], correct:0, icon:"ruler", difficulty:1},
-  {q:"我們與家人一起居住的地方稱為甚麼？", opts:["House","School","Park","Library"], correct:0, icon:"familyhouse", difficulty:1},
-  {q:"這種動物的名稱是甚麼？", opts:["Cat","Dog","Bird","Fish"], correct:0, icon:"cat", difficulty:1},
-  {q:"這種動物是人類的好朋友，稱為甚麼？", opts:["Cat","Dog","Rabbit","Duck"], correct:1, icon:"dog", difficulty:1},
-  {q:"用來踢或拍打的圓形物件稱為甚麼？", opts:["Ball","Book","Bag","Ruler"], correct:0, icon:"ball", difficulty:1},
-  {q:"天空中發光發熱的天體是甚麼？", opts:["Moon","Sun","Star","Cloud"], correct:1, icon:"sun", difficulty:2},
-  {q:"用來量度長度的文具稱為甚麼？", opts:["Ruler","Pen","Book","Bag"], correct:0, icon:"ruler", difficulty:2},
-  {q:"我們可以借閱圖書的地方是甚麼？", opts:["Library","Hospital","Park","Shop"], correct:0, icon:"book", difficulty:2},
-  {q:"與我們一起在家中居住的人稱為甚麼？", opts:["Family","Teacher","Stranger","Classmate"], correct:0, icon:"familyhouse", difficulty:2},
-  {q:"與你一起上課的人稱為甚麼？", opts:["Teacher","Classmate","Doctor","Driver"], correct:1, icon:"classmates", difficulty:2},
-  {q:"我們常吃的蘋果是甚麼顏色？", opts:["Red","Blue","Black","Purple"], correct:0, icon:"apple", difficulty:2},
-  {q:"這是甚麼水果？", opts:["Apple","Banana","Orange","Grape"], correct:0, icon:"apple", difficulty:2},
-  {q:"書包內通常裝有甚麼物品前往學校？", opts:["Books and pencil case","Clothes only","Food only","Toys only"], correct:0, icon:"schoolbag", difficulty:2},
-  {q:"放學後可以前往哪裡玩滑梯？", opts:["Playground","Hospital","Office","Bank"], correct:0, icon:"slide", difficulty:2},
-  {q:"香港常見的公共交通工具是甚麼？", opts:["Minibus","Camel","Horse","Sled"], correct:0, icon:"minibus", difficulty:2},
-  {q:"過海時可以乘搭的交通工具是甚麼？", opts:["Ferry","Camel","Sled","Horse"], correct:0, icon:"ferry", difficulty:2},
-  {q:"香港最便利的地底交通工具稱為甚麼？", opts:["MTR","Sled","Camel","Canoe"], correct:0, icon:"mtr", difficulty:2},
-  {q:"星期日在茶樓常見的食物稱為甚麼？", opts:["Dim Sum","Steak","Pasta","Salad"], correct:0, icon:"dimsum", difficulty:2},
-  {q:"街頭小食店常見的甜點稱為甚麼？", opts:["Egg Waffle","Sushi","Taco","Pie"], correct:0, icon:"eggwaffle", difficulty:3},
-  {q:"香港茶餐廳常見的飲品是甚麼？", opts:["Milk Tea","Coconut Water","Wine","Beer"], correct:0, icon:"milktea", difficulty:3},
-  {q:"筆盒通常用來裝甚麼物品？", opts:["Pencils and erasers","Clothes","Shoes","Food"], correct:0, icon:"pencilcase", difficulty:3},
-  {q:"我們閱讀和溫習的地方稱為甚麼？", opts:["Library","Playground","Kitchen","Garage"], correct:0, icon:"book", difficulty:3},
-  {q:"每天早上升起的天體是甚麼？", opts:["Sun","Moon","Star","Cloud"], correct:0, icon:"sun", difficulty:3},
-  {q:"用來寫字和畫畫的文具是甚麼？", opts:["Pen","Ball","Bag","Ferry"], correct:0, icon:"pencilcase", difficulty:3},
-  {q:"這是甚麼動物的圖像？", opts:["Dog","Cat","Bird","Fish"], correct:0, icon:"dog", difficulty:3},
-  {q:"這是我們日常居住的建築物，稱為甚麼？", opts:["House","Ferry","MTR","Slide"], correct:0, icon:"familyhouse", difficulty:3},
-  {q:"喜歡閱讀的人常去的地方是甚麼？", opts:["Library","Playground","Kitchen","Bathroom"], correct:0, icon:"book", difficulty:3},
-  {q:"這種黃色的水果稱為甚麼？", opts:["Banana","Apple","Orange","Grape"], correct:0, icon:"apple", difficulty:3},
-  {q:"我們在學校內認識的朋友稱為甚麼？", opts:["Classmate","Stranger","Neighbour","Customer"], correct:0, icon:"classmates", difficulty:3},
-  {q:"我們用來裝載課本的物品稱為甚麼？", opts:["Schoolbag","Milk Tea","Ferry","Ball"], correct:0, icon:"schoolbag", difficulty:3},
-  {q:"哪一種交通工具航行於海上？", opts:["Ferry","MTR","Minibus","Bicycle"], correct:0, icon:"ferry", difficulty:3},
-  {q:"哪一種食物在早茶時段常見？", opts:["Dim Sum","Pizza","Hamburger","Sandwich"], correct:0, icon:"dimsum", difficulty:3},
-];
-const READING_BANK = [
-  {passage:"Tom goes to school by minibus every morning. He carries his schoolbag with his book and pencil case.",
-   q:"How does Tom go to school?", opts:["By minibus","By ferry","By bicycle","By MTR"], correct:0, icon:"minibus", difficulty:1},
-  {passage:"On Sunday, my family and I take the ferry to Hong Kong Island. We eat dim sum for lunch.",
-   q:"What do they eat for lunch?", opts:["Dim sum","Egg waffle","Pizza","Bread"], correct:0, icon:"dimsum", difficulty:1},
-  {passage:"Amy likes to play on the slide at the playground with her classmates after school.",
-   q:"Where does Amy play?", opts:["At the playground","At the library","At home","At the MTR station"], correct:0, icon:"slide", difficulty:1},
-  {passage:"I have a pet dog. My dog is brown. I play with my dog in the park every evening.",
-   q:"What colour is the dog?", opts:["Brown","Black","White","Grey"], correct:0, icon:"dog", difficulty:1},
-  {passage:"After school, Ben buys an egg waffle and a cup of milk tea from the shop near his house.",
-   q:"What does Ben buy?", opts:["Egg waffle and milk tea","Dim sum and juice","Bread and water","Rice and tea"], correct:0, icon:"eggwaffle", difficulty:1},
-  {passage:"My classmates and I read books in the school library every Friday afternoon.",
-   q:"When do they read books?", opts:["Friday afternoon","Monday morning","Sunday evening","Saturday night"], correct:0, icon:"book", difficulty:1},
-  {passage:"Every morning, I put my ruler and pencil case into my schoolbag before going to school.",
-   q:"What does the child put into the schoolbag?", opts:["Ruler and pencil case","Milk tea and bread","Ball and slide","Dog and cat"], correct:0, icon:"schoolbag", difficulty:1},
-  {passage:"My family lives in a small house near the park. I like to play with my ball there.",
-   q:"Where is the house located?", opts:["Near the park","Near the library","On a boat","In the sky"], correct:0, icon:"familyhouse", difficulty:1},
-  {passage:"On my way to school, I see the sun shining brightly in the sky. It makes me happy.",
-   q:"What does the child see in the sky?", opts:["The sun","The moon","A bird","A plane"], correct:0, icon:"sun", difficulty:2},
-  {passage:"My cat likes to sleep on my bed. Every day after school, I feed my cat and play with it.",
-   q:"What does the child do after school?", opts:["Feed and play with the cat","Go to the library","Take the MTR","Eat dim sum"], correct:0, icon:"cat", difficulty:2},
-  {passage:"We take the MTR to visit my grandmother every weekend. She lives near the park.",
-   q:"How do they visit grandmother?", opts:["By MTR","By ferry","By minibus","By taxi"], correct:0, icon:"mtr", difficulty:2},
-  {passage:"At school, my teacher gives me a ruler to measure my book. I put it back in my pencil case.",
-   q:"What does the child use to measure the book?", opts:["A ruler","A ball","A bag","A dog"], correct:0, icon:"ruler", difficulty:2},
-  {passage:"My mother buys apples and bananas from the market. I eat an apple every morning.",
-   q:"What does the child eat every morning?", opts:["An apple","A banana","Dim sum","An egg waffle"], correct:0, icon:"apple", difficulty:2},
-  {passage:"On Saturday, my father and I take the ferry to see the sea. We enjoy the sunshine.",
-   q:"What do they take to see the sea?", opts:["The ferry","The MTR","The minibus","The bicycle"], correct:0, icon:"ferry", difficulty:2},
-  {passage:"My classmates and I play ball games at the playground every recess time.",
-   q:"When do they play ball games?", opts:["Recess time","Bedtime","Dinner time","Study time"], correct:0, icon:"ball", difficulty:2},
-  {passage:"Every Saturday, my brother and I visit the library to borrow new storybooks together.",
-   q:"What do they borrow from the library?", opts:["Storybooks","Toys","Food","Clothes"], correct:0, icon:"book", difficulty:2},
-  {passage:"My mother packs my schoolbag with a ruler, a pencil case, and my English book every night.",
-   q:"When does mother pack the schoolbag?", opts:["Every night","Every morning","Every weekend","Every holiday"], correct:0, icon:"schoolbag", difficulty:3},
-  {passage:"On hot summer days, my family enjoys drinking cold milk tea at the tea restaurant nearby.",
-   q:"What do they drink on hot days?", opts:["Cold milk tea","Hot soup","Warm water","Coffee"], correct:0, icon:"milktea", difficulty:3},
-  {passage:"My grandfather lives in a house near the MTR station, so we visit him easily every Sunday.",
-   q:"Where does grandfather live?", opts:["Near the MTR station","On a boat","In the library","At school"], correct:0, icon:"mtr", difficulty:3},
-  {passage:"My little sister loves to feed our pet dog every afternoon after she comes home from school.",
-   q:"Who feeds the pet dog?", opts:["Little sister","Grandfather","Teacher","Classmate"], correct:0, icon:"dog", difficulty:3},
-  {passage:"During recess, my classmates and I share an egg waffle and talk about our favourite games.",
-   q:"What do they share during recess?", opts:["An egg waffle","A ball","A book","A ruler"], correct:0, icon:"eggwaffle", difficulty:3},
-  {passage:"Every Sunday morning, my family takes the ferry across the harbour to visit my aunt.",
-   q:"When do they take the ferry?", opts:["Sunday morning","Monday evening","Saturday night","Friday afternoon"], correct:0, icon:"ferry", difficulty:3},
-  {passage:"I keep my pencils and eraser neatly inside my pencil case so I do not lose them at school.",
-   q:"Where does the child keep the pencils?", opts:["Inside the pencil case","Inside the schoolbag","On the desk","In the library"], correct:0, icon:"pencilcase", difficulty:3},
-  {passage:"After lunch, my family often orders dim sum and enjoys the warm tea at our favourite restaurant.",
-   q:"What does the family order after lunch?", opts:["Dim sum","Egg waffle","Milk tea only","Fruit"], correct:0, icon:"dimsum", difficulty:3},
-  {passage:"On sunny afternoons, my friends and I like to slide down the playground slide many times.",
-   q:"What do they do on sunny afternoons?", opts:["Slide down the playground slide","Read in the library","Take the ferry","Eat dim sum"], correct:0, icon:"slide", difficulty:3},
-];
-
-const MODES = {
-  phonics: {name:"拼音礦洞 Phonics Rush", cls:"phonics", bank:PHONICS_BANK, desc:"在60秒內盡量答對更多拼音題目！", time:60},
-  vocab:   {name:"生活詞彙礦洞 Vocab Blitz", cls:"vocab", bank:VOCAB_BANK, desc:"香港生活場景詞彙限時挑戰題目！(60秒)", time:60},
-  reading: {name:"閱讀礦洞 Reading Quest", cls:"reading", bank:READING_BANK, desc:"閱讀短文並於限時內完成答題（90秒，時間更充裕）", time:90},
-};
-
-/* ============ STATE ============ */
 let state = null;
-let currentMode = null;
+let currentCategory = null;
+let currentUnit = null;
 let currentQ = null;
 let timerInterval = null;
 let timeLeft = 0;
 let totalTime = 30;
 let comboCount = 0;
 let sessionCorrect = 0, sessionAttempts = 0, sessionXP = 0;
+let questionQueue = [];
 
 function defaultState(name){
-  return {
-    name, xp: 0, streak: 0,
-    modes: {
-      phonics: {bestScore:0, difficulty:1, totalCorrect:0, totalAttempts:0},
-      vocab:   {bestScore:0, difficulty:1, totalCorrect:0, totalAttempts:0},
-      reading: {bestScore:0, difficulty:1, totalCorrect:0, totalAttempts:0},
-    }
-  };
+  const progress = {};
+  Object.keys(CATEGORY_META).forEach(cat=>{
+    progress[cat] = {};
+    CATEGORY_META[cat].units.forEach((u,idx)=>{
+      progress[cat][u.id] = { unlocked: idx===0, completed:false, bestScore:0, totalCorrect:0, totalAttempts:0, stars:0 };
+    });
+  });
+  return { name, xp:0, streak:0, progress, volume: { melody:0.05, bass:0.07, chords:0.025 } };
 }
-function saveState(){ localStorage.setItem('craftEnglishStateHK2', JSON.stringify(state)); }
-function loadState(){ const raw = localStorage.getItem('craftEnglishStateHK2'); return raw ? JSON.parse(raw) : null; }
+function saveState(){ localStorage.setItem('craftEnglishStateHK3', JSON.stringify(state)); }
+function loadState(){ const raw = localStorage.getItem('craftEnglishStateHK3'); return raw ? JSON.parse(raw) : null; }
 
 function startGame(){
   ensureMusicCtx();
@@ -380,35 +311,28 @@ function startGame(){
   const inputName = document.getElementById('player-name').value.trim() || "小勇者";
   let existing = loadState();
   state = (existing && existing.name === inputName) ? existing : defaultState(inputName);
+  if(!state.volume) state.volume = { melody:0.05, bass:0.07, chords:0.025 };
   saveState();
   document.getElementById('hud-name').innerText = state.name;
   refreshHud();
-  renderLevelGrid();
-  showScreen('screen-levels');
+  renderCategoryGrid();
+  showScreen('screen-categories');
 }
+
 const LEVEL_TITLES = [
-  {min:0, title:"見習礦工"},
-  {min:100, title:"初級冒險家"},
-  {min:250, title:"拼音學徒"},
-  {min:450, title:"詞彙探索者"},
-  {min:700, title:"閱讀勇士"},
-  {min:1000, title:"英語建築師"},
-  {min:1400, title:"礦洞大師"},
-  {min:1900, title:"英語王者"},
+  {min:0, title:"見習礦工"}, {min:100, title:"初級冒險家"}, {min:250, title:"拼音學徒"},
+  {min:450, title:"詞彙探索者"}, {min:700, title:"閱讀勇士"}, {min:1000, title:"英語建築師"},
+  {min:1400, title:"礦洞大師"}, {min:1900, title:"英語王者"},
 ];
 function calcLevel(xp){
-  let level = 1;
-  let title = LEVEL_TITLES[0].title;
-  let currentMin = 0, nextMin = 100;
-  for(let i = 0; i < LEVEL_TITLES.length; i++){
+  let level=1, title=LEVEL_TITLES[0].title, currentMin=0, nextMin=100;
+  for(let i=0;i<LEVEL_TITLES.length;i++){
     if(xp >= LEVEL_TITLES[i].min){
-      level = i + 1;
-      title = LEVEL_TITLES[i].title;
-      currentMin = LEVEL_TITLES[i].min;
-      nextMin = (i + 1 < LEVEL_TITLES.length) ? LEVEL_TITLES[i+1].min : currentMin + 500;
+      level=i+1; title=LEVEL_TITLES[i].title; currentMin=LEVEL_TITLES[i].min;
+      nextMin = (i+1<LEVEL_TITLES.length) ? LEVEL_TITLES[i+1].min : currentMin+500;
     }
   }
-  return {level, title, currentMin, nextMin};
+  return {level,title,currentMin,nextMin};
 }
 function refreshHud(){
   document.getElementById('hud-xp').innerText = state.xp;
@@ -425,37 +349,85 @@ function refreshHud(){
     document.getElementById('panel-xp-text').innerText = (state.xp - lv.currentMin) + ' / ' + (lv.nextMin - lv.currentMin) + ' XP 到下一等級';
   }
 }
-function renderLevelGrid(){
-  const grid = document.getElementById('level-grid');
+
+function categoryStats(catKey){
+  const units = CATEGORY_META[catKey].units;
+  const prog = state.progress[catKey];
+  let completed = 0;
+  units.forEach(u=>{ if(prog[u.id].completed) completed++; });
+  return { completed, total: units.length };
+}
+
+function renderCategoryGrid(){
+  const grid = document.getElementById('category-grid');
   grid.innerHTML = '';
-  Object.keys(MODES).forEach(key=>{
-    const m = MODES[key];
-    const st = state.modes[key];
+  Object.keys(CATEGORY_META).forEach(key=>{
+    const m = CATEGORY_META[key];
+    const st = categoryStats(key);
     const div = document.createElement('div');
     div.className = 'mode-block ' + m.cls;
-    div.innerHTML = `<div class="icon-wrap small">${renderIcon(ICONS.clock)}</div>
-      <div><b>⛏️ ${m.name}</b><br><small>${m.desc} · 難度 ${'⭐'.repeat(st.difficulty)} · 最高分 ${st.bestScore}</small></div>`;
-    div.onclick = () => enterChallenge(key);
+    div.innerHTML = `<div class="icon-wrap small">${renderIcon(ICONS[m.icon])}</div>
+      <div><b>⛏️ ${m.name}</b><br><small>${m.desc}<br>已完成 ${st.completed} / ${st.total} 個單元</small></div>`;
+    div.onclick = () => enterCategory(key);
     grid.appendChild(div);
   });
 }
-function enterChallenge(modeKey){
-  currentMode = modeKey;
-  questionQueue = [];
-  questionQueueKey = null;
+
+function enterCategory(catKey){
+  currentCategory = catKey;
+  document.getElementById('units-title').innerText = CATEGORY_META[catKey].name;
+  renderUnitGrid();
+  showScreen('screen-units');
+}
+
+function renderUnitGrid(){
+  const grid = document.getElementById('unit-grid');
+  grid.innerHTML = '';
+  const units = CATEGORY_META[currentCategory].units;
+  const prog = state.progress[currentCategory];
+  units.forEach(u=>{
+    const up = prog[u.id];
+    const div = document.createElement('div');
+    div.className = 'unit-block ' + CATEGORY_META[currentCategory].cls + (up.unlocked ? '' : ' locked');
+    const statusIcon = up.completed ? '✅' : (up.unlocked ? '🔓' : '🔒');
+    div.innerHTML = `<div class="icon-wrap small">${renderIcon(ICONS[u.preview[0].icon])}</div>
+      <div><b>${statusIcon} ${u.name}</b><br>
+      <small class="stars">${'⭐'.repeat(u.stars)}</small>
+      <small> · 目標答對 ${u.goal} 題 · 限時 ${u.time}s${up.completed ? ' · 最佳 '+up.bestScore+'題' : ''}</small></div>`;
+    if(up.unlocked){ div.onclick = () => enterUnitPreview(u); }
+    grid.appendChild(div);
+  });
+}
+
+function enterUnitPreview(unit){
+  currentUnit = unit;
+  document.getElementById('preview-title').innerText = unit.name;
+  const wrap = document.getElementById('preview-word-grid');
+  wrap.innerHTML = '';
+  unit.preview.forEach(p=>{
+    const card = document.createElement('div');
+    card.className = 'preview-word-card';
+    card.innerHTML = `<div class="icon-wrap">${renderIcon(ICONS[p.icon])}</div><div class="en">${p.word}</div><div class="zh">${p.meaning}</div>`;
+    wrap.appendChild(card);
+  });
+  document.getElementById('preview-goal-badge').innerText = `🎯 目標：在 ${unit.time} 秒內答對 ${unit.goal} 題即可通關！`;
+  showScreen('screen-preview');
+}
+
+function startUnitChallenge(){
   switchMusicTrack('game');
-  const m = MODES[modeKey];
-  totalTime = m.time;
-  timeLeft = m.time;
+  totalTime = currentUnit.time;
+  timeLeft = currentUnit.time;
   comboCount = 0;
   sessionCorrect = 0; sessionAttempts = 0; sessionXP = 0;
-  document.getElementById('level-label').innerText = m.name;
-  document.getElementById('diff-label').innerText = '難度: ' + '⭐'.repeat(state.modes[modeKey].difficulty);
+  questionQueue = shuffleArray(currentUnit.questions.map((_,i)=>i));
+  document.getElementById('level-label').innerText = currentUnit.name;
   document.getElementById('timer-outer').classList.remove('urgent');
   showScreen('screen-game');
   nextQuestion();
   startTimer();
 }
+
 function startTimer(){
   clearInterval(timerInterval);
   updateTimerBar();
@@ -465,7 +437,7 @@ function startTimer(){
       document.getElementById('timer-outer').classList.add('urgent');
       if(currentMusicTrack !== 'urgent') switchMusicTrack('urgent');
     }
-    if(timeLeft <= 0){ timeLeft = 0; clearInterval(timerInterval); updateTimerBar(); endChallenge(true); return; }
+    if(timeLeft <= 0){ timeLeft = 0; clearInterval(timerInterval); updateTimerBar(); endChallenge(true, false); return; }
     updateTimerBar();
   }, 100);
 }
@@ -473,114 +445,141 @@ function updateTimerBar(){
   const pct = Math.max(0,(timeLeft/totalTime)*100);
   document.getElementById('timer-inner').style.width = pct + '%';
   document.getElementById('timer-text').innerText = '⏱️ ' + Math.ceil(timeLeft) + 's';
+  document.getElementById('goal-label').innerText = `🎯 答對 ${sessionCorrect}/${currentUnit.goal}`;
 }
-let questionQueue = [];
-let questionQueueKey = null;
 function shuffleArray(arr){
   const a = arr.slice();
-  for(let i = a.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
   return a;
 }
 function pickQuestion(){
-  const bank = MODES[currentMode].bank;
-  const diff = state.modes[currentMode].difficulty;
-  const key = currentMode + '-' + diff;
-  if(questionQueueKey !== key || questionQueue.length === 0){
-    const filteredIdx = bank.map((item, idx) => item.difficulty === diff ? idx : -1).filter(idx => idx !== -1);
-    questionQueue = shuffleArray(filteredIdx);
-    questionQueueKey = key;
-  }
+  if(questionQueue.length === 0){ questionQueue = shuffleArray(currentUnit.questions.map((_,i)=>i)); }
   const idx = questionQueue.pop();
-  return bank[idx];
+  return currentUnit.questions[idx];
+}
+function shuffleOptions(q){
+  const correctText = q.opts[q.correct];
+  const shuffled = shuffleArray(q.opts);
+  return { opts: shuffled, correct: shuffled.indexOf(correctText) };
 }
 function nextQuestion(){
   document.getElementById('feedback').innerText = '';
   currentQ = pickQuestion();
+  const shuffledData = shuffleOptions(currentQ);
+  currentQ = Object.assign({}, currentQ, { opts: shuffledData.opts, correct: shuffledData.correct });
   const passageArea = document.getElementById('passage-area');
-  if(currentMode === 'reading'){
+  if(currentQ.passage){
     passageArea.innerHTML = `<div class="reading-passage">📖 ${currentQ.passage}</div>`;
-  } else {
-    passageArea.innerHTML = '';
-  }
+  } else { passageArea.innerHTML = ''; }
   document.getElementById('game-icon').innerHTML = renderIcon(ICONS[currentQ.icon]);
   document.getElementById('question-text').innerText = currentQ.q;
   const optsGrid = document.getElementById('options-grid');
   optsGrid.innerHTML = '';
-  currentQ.opts.forEach((opt, i)=>{
+  currentQ.opts.forEach((opt,i)=>{
     const b = document.createElement('div');
     b.className = 'option-block';
     b.innerText = opt;
-    b.onclick = () => answer(i, b);
+    b.onclick = () => answer(i,b);
     optsGrid.appendChild(b);
   });
   document.getElementById('combo-display').innerText = comboCount > 1 ? `🔥 連擊 x${comboCount}!` : '';
+  updateTimerBar();
 }
 
-
-/* ============ BACKGROUND MUSIC ENGINE (procedural 8-bit style) ============ */
 let musicCtx = null;
 let musicPlaying = false;
 let musicMuted = false;
 let musicTimer = null;
 let currentMusicTrack = 'menu';
 
-const MUSIC_PATTERNS = {
-  menu: [523.25,0,659.25,0,783.99,0,659.25,0, 523.25,0,659.25,0,523.25,0,0,0],
-  game: [392.00,523.25,392.00,523.25, 440.00,587.33,440.00,587.33, 349.23,440.00,349.23,440.00, 392.00,523.25,392.00,0],
-  urgent: [523.25,659.25,523.25,659.25, 587.33,698.46,587.33,698.46, 523.25,659.25,523.25,659.25, 493.88,587.33,493.88,587.33],
-  result: [659.25,0,523.25,0,392.00,0,523.25,0, 659.25,0,783.99,0,659.25,0,0,0]
+const MUSIC_TRACKS = {
+  menu: {
+    melody: [523.25,0,659.25,0,783.99,0,659.25,0, 523.25,0,659.25,0,523.25,0,0,0],
+    bass:   [130.81,0,0,0,164.81,0,0,0, 130.81,0,0,0,196.00,0,0,0],
+    chords: [[261.63,329.63,392.00],0,0,0, [329.63,415.30,493.88],0,0,0, [261.63,329.63,392.00],0,0,0, [246.94,311.13,392.00],0,0,0],
+    tempo: 0.22
+  },
+  game: {
+    melody: [392.00,523.25,392.00,523.25, 440.00,587.33,440.00,587.33, 349.23,440.00,349.23,440.00, 392.00,523.25,392.00,0],
+    bass:   [98.00,0,98.00,0, 110.00,0,110.00,0, 87.31,0,87.31,0, 98.00,0,98.00,0],
+    chords: [[196.00,246.94,293.66],0,[196.00,246.94,293.66],0, [220.00,277.18,329.63],0,[220.00,277.18,329.63],0, [174.61,220.00,261.63],0,[174.61,220.00,261.63],0, [196.00,246.94,293.66],0,[196.00,246.94,293.66],0],
+    tempo: 0.18
+  },
+  urgent: {
+    melody: [523.25,659.25,523.25,659.25, 587.33,698.46,587.33,698.46, 523.25,659.25,523.25,659.25, 493.88,587.33,493.88,587.33],
+    bass:   [130.81,130.81,130.81,130.81, 146.83,146.83,146.83,146.83, 130.81,130.81,130.81,130.81, 123.47,123.47,123.47,123.47],
+    chords: [[261.63,329.63,392.00],0,0,0, [293.66,369.99,440.00],0,0,0, [261.63,329.63,392.00],0,0,0, [246.94,311.13,369.99],0,0,0],
+    tempo: 0.14
+  },
+  result: {
+    melody: [659.25,0,523.25,0,392.00,0,523.25,0, 659.25,0,783.99,0,659.25,0,0,0],
+    bass:   [164.81,0,130.81,0,98.00,0,130.81,0, 164.81,0,196.00,0,164.81,0,0,0],
+    chords: [[329.63,415.30,493.88],0,0,0, [261.63,329.63,392.00],0,0,0, [329.63,415.30,493.88],0,0,0, [392.00,493.88,587.33],0,0,0],
+    tempo: 0.20
+  }
 };
-const NOTE_DURATION = 0.18;
 
 function ensureMusicCtx(){
-  if(!musicCtx){
-    musicCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
+  if(!musicCtx){ musicCtx = new (window.AudioContext || window.webkitAudioContext)(); }
   if(musicCtx.state === 'suspended') musicCtx.resume();
 }
-
-function playMusicStep(freq){
+function playNoteLayer(freq, type, gainLevel, duration){
   if(musicMuted || !freq) return;
   const osc = musicCtx.createOscillator();
   const gain = musicCtx.createGain();
-  osc.type = 'triangle';
+  osc.type = type;
   osc.frequency.value = freq;
-  gain.gain.setValueAtTime(0.06, musicCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, musicCtx.currentTime + NOTE_DURATION);
+  gain.gain.setValueAtTime(gainLevel, musicCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, musicCtx.currentTime + duration);
   osc.connect(gain);
   gain.connect(musicCtx.destination);
   osc.start();
-  osc.stop(musicCtx.currentTime + NOTE_DURATION);
+  osc.stop(musicCtx.currentTime + duration);
 }
-
+function playMusicStep(track, step){
+  if(musicMuted) return;
+  const noteDur = track.tempo * 1.8;
+  const vol = state ? state.volume : {melody:0.05,bass:0.07,chords:0.025};
+  const melodyNote = track.melody[step % track.melody.length];
+  if(melodyNote) playNoteLayer(melodyNote, 'square', vol.melody, noteDur);
+  const bassNote = track.bass[step % track.bass.length];
+  if(bassNote) playNoteLayer(bassNote, 'triangle', vol.bass, noteDur * 1.3);
+  const chordEntry = track.chords[step % track.chords.length];
+  if(chordEntry && Array.isArray(chordEntry)){
+    chordEntry.forEach(freq => playNoteLayer(freq, 'sine', vol.chords, noteDur * 1.6));
+  }
+}
 function startMusicLoop(trackName){
   ensureMusicCtx();
   currentMusicTrack = trackName;
   clearInterval(musicTimer);
   let step = 0;
-  const pattern = MUSIC_PATTERNS[trackName] || MUSIC_PATTERNS.menu;
-  musicTimer = setInterval(() => {
-    if(!musicMuted){
-      playMusicStep(pattern[step % pattern.length]);
-    }
-    step++;
-  }, NOTE_DURATION * 1000);
+  const track = MUSIC_TRACKS[trackName] || MUSIC_TRACKS.menu;
+  musicTimer = setInterval(() => { playMusicStep(track, step); step++; }, track.tempo * 1000);
   musicPlaying = true;
 }
-
-function switchMusicTrack(trackName){
-  if(currentMusicTrack !== trackName){
-    startMusicLoop(trackName);
-  }
-}
-
+function switchMusicTrack(trackName){ if(currentMusicTrack !== trackName){ startMusicLoop(trackName); } }
 function toggleMusic(){
   musicMuted = !musicMuted;
   document.getElementById('music-toggle').innerText = musicMuted ? '🔇' : '🔊';
   if(!musicMuted) ensureMusicCtx();
+}
+function openVolumePanel(){
+  if(!state) return;
+  document.getElementById('vol-melody').value = Math.round(state.volume.melody * 1000);
+  document.getElementById('vol-bass').value = Math.round(state.volume.bass * 1000);
+  document.getElementById('vol-chords').value = Math.round(state.volume.chords * 1000);
+  showScreen('screen-volume');
+}
+function closeVolumePanel(){
+  showScreen(currentUnit ? 'screen-preview' : 'screen-categories');
+}
+function updateVolume(){
+  if(!state) return;
+  state.volume.melody = document.getElementById('vol-melody').value / 1000;
+  state.volume.bass = document.getElementById('vol-bass').value / 1000;
+  state.volume.chords = document.getElementById('vol-chords').value / 1000;
+  saveState();
 }
 
 function playTone(freq, duration){
@@ -606,18 +605,17 @@ function answer(i, el){
     if(idx === currentQ.correct) b.classList.add('correct');
     if(idx === i && !correct) b.classList.add('wrong');
   });
-  const st = state.modes[currentMode];
-  st.totalAttempts++;
+  const up = state.progress[currentCategory][currentUnit.id];
+  up.totalAttempts++;
   if(correct){
     sessionCorrect++; comboCount++;
     const bonus = comboCount >= 3 ? 2 : 1;
-    const points = 10 * st.difficulty * bonus;
+    const points = 10 * currentUnit.tier * bonus;
     sessionXP += points;
-    st.totalCorrect++;
+    up.totalCorrect++;
     document.getElementById('feedback').innerText = comboCount >= 3 ? '🎉 COMBO BONUS!' : '✅ 答對！';
     playTone(880, 0.15);
     timeLeft = Math.min(totalTime, timeLeft + 1.5);
-    if(sessionCorrect % 4 === 0 && st.difficulty < 3){ st.difficulty++; }
   } else {
     comboCount = 0;
     document.getElementById('feedback').innerText = '❌ 答錯了！';
@@ -625,46 +623,87 @@ function answer(i, el){
     timeLeft = Math.max(0, timeLeft - 2);
   }
   saveState();
+  if(sessionCorrect >= currentUnit.goal){
+    setTimeout(()=>{ endChallenge(false, true); }, 550);
+    return;
+  }
   setTimeout(()=>{ if(timeLeft > 0) nextQuestion(); }, 550);
 }
-function endChallenge(timeUp){
+
+function unlockNextUnit(){
+  const units = CATEGORY_META[currentCategory].units;
+  const idx = units.findIndex(u=>u.id === currentUnit.id);
+  if(idx >= 0 && idx+1 < units.length){
+    const nextUnit = units[idx+1];
+    state.progress[currentCategory][nextUnit.id].unlocked = true;
+  }
+}
+
+function endChallenge(timeUp, goalReached){
   clearInterval(timerInterval);
   state.xp += sessionXP;
   state.streak = sessionCorrect;
-  const st = state.modes[currentMode];
-  if(sessionCorrect > st.bestScore) st.bestScore = sessionCorrect;
+  const up = state.progress[currentCategory][currentUnit.id];
+  if(sessionCorrect > up.bestScore) up.bestScore = sessionCorrect;
+  if(goalReached){
+    up.completed = true;
+    up.stars = Math.max(up.stars, currentUnit.stars);
+    unlockNextUnit();
+  }
   refreshHud();
   saveState();
-  document.getElementById('result-icon').innerHTML = renderIcon(ICONS.diamond_gem);
-  document.getElementById('result-score').innerText = sessionCorrect + ' 題答對';
+  document.getElementById('result-icon').innerHTML = renderIcon(goalReached ? ICONS.diamond_gem : ICONS.clock);
+  document.getElementById('result-title').innerText = goalReached ? '🎉 過關成功！' : '⏰ 時間到！';
+  document.getElementById('result-score').innerText = sessionCorrect + ' / ' + currentUnit.goal + ' 題答對';
   document.getElementById('result-diamonds').innerText = '💎 +' + sessionXP + ' XP';
   const rate = sessionAttempts ? Math.round((sessionCorrect/sessionAttempts)*100) : 0;
-  document.getElementById('result-msg').innerText = timeUp
-    ? `時間已到！答對率為 ${rate}%，請繼續努力，挖礦升級！`
-    : `挑戰已中止，答對率為 ${rate}%。`;
+  document.getElementById('result-msg').innerText = goalReached
+    ? `恭喜通關！答對率為 ${rate}%，已解鎖下一個單元！`
+    : (timeUp ? `時間已到，未達成目標。答對率為 ${rate}%，再接再厲！` : `挑戰已中止，答對率為 ${rate}%。`);
+  const nextBtn = document.getElementById('result-next-btn');
+  const units = CATEGORY_META[currentCategory].units;
+  const idx = units.findIndex(u=>u.id === currentUnit.id);
+  if(goalReached && idx+1 < units.length){
+    nextBtn.style.display = 'inline-block';
+    nextBtn.innerText = '➡️ 下一關：' + units[idx+1].name;
+    nextBtn.onclick = () => enterUnitPreview(units[idx+1]);
+  } else if(goalReached){
+    nextBtn.style.display = 'inline-block';
+    nextBtn.innerText = '⬅️ 返回單元列表';
+    nextBtn.onclick = () => showScreen('screen-units');
+  } else {
+    nextBtn.style.display = 'inline-block';
+    nextBtn.innerText = '🔁 再試一次';
+    nextBtn.onclick = () => enterUnitPreview(currentUnit);
+  }
   showScreen('screen-result');
 }
+
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   if(id === 'screen-report') renderReport();
-  if(id === 'screen-levels'){ renderLevelGrid(); switchMusicTrack('menu'); }
+  if(id === 'screen-categories'){ renderCategoryGrid(); switchMusicTrack('menu'); }
+  if(id === 'screen-units'){ renderUnitGrid(); }
   if(id === 'screen-result'){ switchMusicTrack('result'); }
 }
+
 function renderReport(){
   const table = document.getElementById('report-table');
-  table.innerHTML = '<tr><th>礦洞</th><th>目前難度</th><th>累積答對率</th><th>最高單次得分</th></tr>';
-  Object.keys(MODES).forEach(key=>{
-    const st = state.modes[key];
-    const rate = st.totalAttempts ? Math.round((st.totalCorrect/st.totalAttempts)*100) + '%' : '-';
-    const row = document.createElement('tr');
-    row.innerHTML = `<td>${MODES[key].name}</td><td>${'⭐'.repeat(st.difficulty)}</td><td>${rate}</td><td>${st.bestScore}</td>`;
-    table.appendChild(row);
+  table.innerHTML = '<tr><th>礦洞</th><th>單元</th><th>狀態</th><th>答對率</th><th>最佳成績</th></tr>';
+  Object.keys(CATEGORY_META).forEach(catKey=>{
+    CATEGORY_META[catKey].units.forEach(u=>{
+      const up = state.progress[catKey][u.id];
+      const rate = up.totalAttempts ? Math.round((up.totalCorrect/up.totalAttempts)*100) + '%' : '-';
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>${CATEGORY_META[catKey].name.split(' ')[0]}</td><td>${u.name}</td><td>${up.completed ? '✅ 已完成' : (up.unlocked ? '🔓 進行中' : '🔒 未解鎖')}</td><td>${rate}</td><td>${up.bestScore}/${u.goal}</td>`;
+      table.appendChild(row);
+    });
   });
 }
 function resetProgress(){
   if(confirm('確定要重設所有學習進度嗎？')){
-    state = defaultState(state.name); saveState(); renderLevelGrid(); renderReport();
+    state = defaultState(state.name); saveState(); renderCategoryGrid(); renderReport();
   }
 }
 
@@ -676,18 +715,15 @@ function speakQuestion(){
   const enVoice = voices.find(v => v.lang === 'en-US' && /female|Samantha|Google US English/i.test(v.name))
                   || voices.find(v => v.lang === 'en-US')
                   || voices.find(v => v.lang && v.lang.startsWith('en'));
-
   const chineseUtterance = new SpeechSynthesisUtterance(currentQ.q);
   chineseUtterance.lang = 'zh-HK';
   chineseUtterance.rate = 0.9;
   if(zhVoice) chineseUtterance.voice = zhVoice;
-
   const englishText = (currentQ.passage ? currentQ.passage + '. ' : '') + 'Options: ' + currentQ.opts.join(', ');
   const englishUtterance = new SpeechSynthesisUtterance(englishText);
   englishUtterance.lang = 'en-US';
   englishUtterance.rate = 0.8;
   if(enVoice) englishUtterance.voice = enVoice;
-
   chineseUtterance.onend = () => { window.speechSynthesis.speak(englishUtterance); };
   window.speechSynthesis.speak(chineseUtterance);
 }
