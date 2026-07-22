@@ -61,8 +61,6 @@ footer { text-align: center; font-size: 10px; opacity: 0.6; padding: 10px; }
 .preview-word-card .zh { font-size: 11px; opacity: 0.8; }
 .slider-row { display: flex; align-items: center; gap: 8px; justify-content: center; margin: 8px 0; }
 .goal-badge { background: rgba(255,215,106,0.15); border: 2px solid #ffd76a; border-radius: 6px; padding: 8px; margin: 8px 0; font-size: 13px; }
-
-.lesson-box { background:rgba(52,152,219,0.12); border:2px solid #3498db; border-radius:6px; padding:12px; margin:10px 0; text-align:left; font-size:13px; line-height:1.6; }
 </style>
 </head>
 <body>
@@ -213,25 +211,12 @@ footer { text-align: center; font-size: 10px; opacity: 0.6; padding: 10px; }
       </div>
     </div>
 
-    <div class="screen" id="screen-preview">
-      <div class="card">
-        <h2 style="color:#ffd76a;" id="preview-title">預習生字</h2>
-        <p style="font-size:13px;opacity:0.85;">在挑戰之前，先認識以下生字，記熟了再開始遊戲！</p>
-        <div class="preview-word-grid" id="preview-word-grid"></div>
-        <div class="goal-badge" id="preview-goal-badge"></div>
-        <button class="block-btn grass" onclick="startUnitChallenge()">⛏️ 開始挑戰</button>
-        <br>
-        <button class="block-btn stone" onclick="showScreen('screen-units')">⬅️ 返回單元列表</button>
-      </div>
-    </div>
-
-    
     <div class="screen" id="screen-lesson">
       <div class="card">
-        <h2 style="color:#ffd76a;" id="lesson-title">拼音規則教學</h2>
-        <div class="lesson-box" id="lesson-rule"></div>
+        <h2 style="color:#ffd76a;" id="lesson-title">拼音教學</h2>
+        <p style="font-size:13px;opacity:0.85;" id="lesson-rule"></p>
         <div class="preview-word-grid" id="lesson-examples"></div>
-        <button class="block-btn grass" onclick="enterSoundBuilder(currentUnit)">🔨 第一關：拼音建構遊戲</button>
+        <button class="block-btn grass" onclick="enterSoundBuilder(currentUnit)">🧩 開始砌字遊戲</button>
         <br>
         <button class="block-btn stone" onclick="showScreen('screen-units')">⬅️ 返回單元列表</button>
       </div>
@@ -239,15 +224,25 @@ footer { text-align: center; font-size: 10px; opacity: 0.6; padding: 10px; }
 
     <div class="screen" id="screen-soundbuilder">
       <div class="card">
-        <h2 style="color:#ffd76a;">🔨 拼音建構遊戲</h2>
-        <p style="font-size:12px;opacity:0.8;" id="sb-instruction">按順序撳出拼音組件，聽下每個音，再組成完整單字！</p>
+        <h2 style="color:#ffd76a;">🧩 拼音砌字遊戲</h2>
+        <p style="font-size:12px;opacity:0.8;" id="sb-progress">1 / 5</p>
         <div class="icon-wrap" id="sb-icon"></div>
-        <div class="question-box" id="sb-built-word">_ _ _</div>
+        <div class="question-box" id="sb-built-word">_ _</div>
         <div class="options-grid" id="sb-chunk-grid"></div>
-        <div id="sb-feedback" style="min-height:24px;font-weight:bold;margin:8px 0;"></div>
-        <button class="block-btn" style="font-size:13px;" onclick="speakEnglishWord(soundBuilderQueue[sbIdx].word)">🔊 聽完整讀音</button>
+        <div id="sb-feedback"></div>
+        <button class="block-btn grass" id="sb-next-btn" style="display:none;" onclick="nextSoundBuilder()">➡️ 下一個字</button>
         <br>
-        <button class="block-btn grass" id="sb-next-btn" style="display:none;" onclick="nextSoundBuilder()">➡️ 下一個</button>
+        <button class="block-btn stone" onclick="showScreen('screen-units')">⬅️ 返回單元列表</button>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-preview">
+      <div class="card">
+        <h2 style="color:#ffd76a;" id="preview-title">預習生字</h2>
+        <p style="font-size:13px;opacity:0.85;">在挑戰之前，先認識以下生字，記熟了再開始遊戲！</p>
+        <div class="preview-word-grid" id="preview-word-grid"></div>
+        <div class="goal-badge" id="preview-goal-badge"></div>
+        <button class="block-btn grass" onclick="startUnitChallenge()">⛏️ 開始挑戰</button>
         <br>
         <button class="block-btn stone" onclick="showScreen('screen-units')">⬅️ 返回單元列表</button>
       </div>
@@ -361,11 +356,30 @@ const ICONS = {
   thumb:{palette:{S:'#f1c27d'},grid:["............","...SS.......","...SS.......","...SS.......","..SSSSSS....","..SSSSSSS...","..SSSSSSS...","...SSSSS....","............","............","............","............"]},
   whale:{palette:{B:'#3498db',W:'#ecf0f1'},grid:["............","..BBBBBBBB..",".BBBBBBBBBB.","BBBBBBBBBBBB","BBBWWWBBBB..",".BBBBBBBB...","..BBBBBB....","............","............","............","............","............"]}
 ,
-cow:{palette:{W:'#ecf0f1',K:'#2c2c2c',P:'#e8a3a3'},grid:["..K....K....",".KWWWWWWK...","KWWKWWWWWK..","KWWWWWWWWK..","KWWPPPPWWK..","KWWPPPPWWK..","KWWWWWWWWK..",".KKKKKKKK...","..K.KK.K....","............","............","............"]},
-turtle:{palette:{G:'#3a7d23',A:'#8b5a2b',W:'#c9a066'},grid:["............","..AA....AA..","..GGGGGGGG..",".GWGWGWGWG..","GGWGWGWGWGG.","GGWGWGWGWGG.",".GGGGGGGGG..","..AA....AA..","............","............","............","............"]},
-corn:{palette:{Y:'#f1c40f',G:'#5c9e31'},grid:["....GG......","...GYGYG....","..GYGYGYG...",".GYGYGYGYG..","GYGYGYGYGYG.","GYGYGYGYGYG.",".GYGYGYGYG..","..GGGGGGG...","....GGG.....","............","............","............"]},
-bee:{palette:{Y:'#f4b400',K:'#2c2c2c',W:'#ecf0f1'},grid:["............",".WW....WW...","WWWW..WWWW..","YYYYYYYYYY..","KKYYYYYYKK..","YYYYYYYYYY..","KKYYYYYYKK..","YYYYYYYYYY..",".KKKKKKKK...","............","............","............"]},
-boat:{palette:{A:'#a0622d',W:'#ecf0f1',B:'#2980b9'},grid:["......W.....","......W.....",".....WWW....","....WWWWW...","....WWWWW...","....WWWWW...","..AAAAAAAA..",".AAAAAAAAAA.","BBBBBBBBBBBB","............","............","............"]}};
+library:{palette:{B:"#8b5a2b",W:"#ecf0f1",R:"#c0392b",G:"#2c3e50"},grid:["............",".BBBBBBBBBB.",".BWWWWWWWWB.",".BWRWGWRWWB.",".BWRWGWRWWB.",".BWRWGWRWWB.",".BWRWGWRWWB.",".BWWWWWWWWB.",".BBBBBBBBBB.","............","............","............"]},
+park:{palette:{G:"#3a7d23",A:"#8b5a2b",L:"#5c9e31"},grid:["......G.....",".....GGG....","....GGGGG...","...GGGGGGG..","....GGGGG...","......A.....","......A.....","LLLLLLALLLLL","............","............","............","............"]},
+supermarket:{palette:{R:"#e74c3c",W:"#ecf0f1",K:"#2c2c2c",Y:"#f1c40f"},grid:["............",".RRRRRRRRRR.",".RWWWWWWWWR.",".RWYWWWWYWR.",".RWWWWWWWWR.",".RWKWWWWKWR.",".RWKWWWWKWR.",".RRRRRRRRRR.","............","............","............","............"]},
+police_station:{palette:{B:"#2980b9",W:"#ecf0f1",K:"#2c2c2c"},grid:["......K.....",".....KKK....",".BBBBBBBBBB.",".BWWWWWWWWB.",".BWBWWWWBWB.",".BWBWWWWBWB.",".BWWWWWWWWB.",".BBBBBBBBBB.","............","............","............","............"]},
+swimmer:{palette:{B:"#4ac9e0",K:"#2c2c2c",P:"#e8a3a3"},grid:["............","....KK......","....PP......","...PPPP.....","..PPPPPP....","BBBBBBBBBBBB","BBBBBBBBBBBB","............","............","............","............","............"]},
+paintbrush:{palette:{W:"#ecf0f1",K:"#2c2c2c",R:"#e74c3c"},grid:["......K.....",".....K......","....K.......","...K........","..K.........",".RRK........","RRRRK.......","WWWK........","............","............","............","............"]},
+soccerball:{palette:{W:"#ecf0f1",K:"#2c2c2c"},grid:["....WWWW....","...WKKKKW...","..WKWWWWKW..","..WKWKKWKW..","..WKWWWWKW..","..WKKKKKKW..","...WKKKKW...","....WWWW....","............","............","............","............"]},
+bicycle:{palette:{K:"#2c2c2c"},grid:["............","............","....KK......","...K..K.....","..K....KKKK.","KK..........","K.K......K.K","K...K....K..","..KKK....KKK","............","............","............"]},
+christmas_tree:{palette:{G:"#2c8a3d",Y:"#f1c40f",R:"#e74c3c"},grid:["......Y.....",".....GGG....","....GGGGG...","...GGGGGGG..","....GGGGG...","...GGGGGGG..","..GGGGGGGGG.","....RRR.....","............","............","............","............"]},
+lantern:{palette:{R:"#e74c3c",Y:"#f1c40f"},grid:["....YYYY....","...RRRRRR...","...RYYYYR...","...RYRRYR...","...RYYYYR...","...RRRRRR...","....YYYY....","......Y.....","............","............","............","............"]},
+fireworks:{palette:{Y:"#f1c40f",R:"#e74c3c",B:"#4ac9e0"},grid:["..Y...R.....","...Y.R......","............","..R.Y.B.....",".Y...B.R....","..B.R.Y.....","............","............","............","............","............","............"]},
+toothbrush:{palette:{W:"#ecf0f1",B:"#4ac9e0"},grid:["............","...WWWW.....","..WWWWWW....","..BBBBBB....",".BBBBBBBB...","............","............","............","............","............","............","............"]},
+soap:{palette:{W:"#ecf0f1",B:"#4ac9e0"},grid:["............","...WWWWWW...","..WBBBBBBW..","..WBBBBBBW..","..WBBBBBBW..","...WWWWWW...","............","............","............","............","............","............"]},
+vegetable:{palette:{G:"#3a7d23",O:"#e8842d"},grid:["............","....GG......","...GGGG.....","..OOOOOO....",".OOOOOOOO...","..OOOOOO....","............","............","............","............","............","............"]},
+coin:{palette:{Y:"#f1c40f",K:"#2c2c2c"},grid:["....YYYY....","...YKKKKY...","..YKYYYYKY..","..YKYKKYKY..","..YKYYYYKY..","..YKKKKKKY..","...YKKKKY...","....YYYY....","............","............","............","............"]},
+banknote:{palette:{G:"#3a7d23",W:"#ecf0f1"},grid:["............","GGGGGGGGGGGG","GWWWWWWWWWWG","GWWWKKWWWWWG","GWWWKKWWWWWG","GWWWWWWWWWWG","GGGGGGGGGGGG","............","............","............","............","............"]},
+receipt:{palette:{W:"#ecf0f1",K:"#2c2c2c"},grid:["...WWWWW....","...WKKKW....","...WKKKW....","...WKKKW....","...WWWWW....","............","............","............","............","............","............","............"]},
+firefighter_hat:{palette:{R:"#e74c3c",Y:"#f1c40f"},grid:["...RRRRRR...","..RRRRRRRR..","..RYYYYYYR..","...RRRRRR...","............","............","............","............","............","............","............","............"]},
+chef_hat:{palette:{W:"#ecf0f1"},grid:["...WWWWW....","..WWWWWWW...","..WWWWWWW...","...WWWWW....","...WWWWW....","............","............","............","............","............","............","............"]},
+tractor:{palette:{G:"#3a7d23",K:"#2c2c2c"},grid:["............","...GGGGG....","..GGGGGGG...","..GGGGGGG...","..K.....K...","............","............","............","............","............","............","............"]},
+gear:{palette:{K:"#7f8c8d"},grid:["....KKKK....","...KKKKKK...","..KKKKKKKK..","..KKKKKKKK..","...KKKKKK...","....KKKK....","............","............","............","............","............","............"]},
+river:{palette:{B:"#4ac9e0"},grid:["............","............","............","............","BBBBBBBBBBBB","BBBBBBBBBBBB","BBBBBBBBBBBB","............","............","............","............","............"]},
+mountain:{palette:{A:"#8b5a2b",W:"#ecf0f1"},grid:["......W.....",".....WWW....","....AAAAA...","...AAAAAAA..","..AAAAAAAAA.",".AAAAAAAAAAA","............","............","............","............","............","............"]},
+recycle_bin:{palette:{G:"#3a7d23",W:"#ecf0f1"},grid:["............","..GGGGGGGG..","..GWWWWWWG..","..GWWWWWWG..","..GWWWWWWG..","..GGGGGGGG..","............","............","............","............","............","............"]}};
 
 function renderIcon(icon){
   if(!icon) return '';
@@ -383,17 +397,16 @@ function renderIcon(icon){
 }
 
 const PHONICS_UNITS = [
-
 {id:"phonics_u1",tier:1,stars:1,name:"拼音第一關：首音配對 Initial Sounds",goal:6,time:65,preview:[{word:"Cat",icon:"cat",meaning:"貓"},{word:"Dog",icon:"dog",meaning:"狗"},{word:"Ball",icon:"ball",meaning:"球"},{word:"Sun",icon:"sun",meaning:"太陽"},{word:"Bag",icon:"schoolbag",meaning:"書包"}],questions:[{q:"哪一個字的首音與「Cat」相同？",opts:["Can", "Dog", "Sun", "Bag"],correct:0,icon:"cat"},{q:"哪一個字的首音與「Dog」相同？",opts:["Bus", "Dig", "Cup", "Map"],correct:1,icon:"dog"},{q:"哪一個字的首音與「Ball」相同？",opts:["Bag", "Sun", "Egg", "Ant"],correct:0,icon:"ball"},{q:"哪一個字的首音與「Sun」相同？",opts:["Sit", "Bus", "Cat", "Dog"],correct:0,icon:"sun"},{q:"哪一個字的首音與「Bag」相同？",opts:["Bus", "Cat", "Sun", "Pen"],correct:0,icon:"schoolbag"},{q:"哪一個字的首音與「Fun」相同？",opts:["Fan", "Bus", "Cat", "Sun"],correct:0,icon:"ball"},{q:"哪一個字的首音與「Map」相同？",opts:["Man", "Dog", "Cat", "Sun"],correct:0,icon:"mtr"},{q:"哪一個字的首音與「Pen」相同？",opts:["Pig", "Dog", "Sun", "Bus"],correct:0,icon:"ruler"},{q:"哪一個字的首音與「Van」相同？",opts:["Vet", "Dog", "Cat", "Sun"],correct:0,icon:"minibus"},{q:"哪一個字的首音與「Net」相同？",opts:["Nut", "Dog", "Bus", "Sun"],correct:0,icon:"ball"}]},
-{id:"phonics_u2",tier:2,stars:1,name:"拼音第二關：尾音配對 Final Sounds",goal:7,time:70,preview:[{word:"Hat",icon:"familyhouse",meaning:"帽子"},{word:"Map",icon:"mtr",meaning:"地圖"},{word:"Bus",icon:"minibus",meaning:"巴士"},{word:"Pen",icon:"ruler",meaning:"筆"},{word:"Dog",icon:"dog",meaning:"狗"}],questions:[{q:"哪一個字的尾音與「Cat」相同？",opts:["Hat","Cap","Can","Car"],correct:0,icon:"cat"},{q:"哪一個字的尾音與「Dog」相同？",opts:["Log","Cat","Bus","Sun"],correct:0,icon:"dog"},{q:"哪一個字的尾音與「Ball」相同？",opts:["Wall","Bus","Cat","Sun"],correct:0,icon:"ball"},{q:"哪一個字的尾音與「Map」相同？",opts:["Cap","Cat","Bus","Sun"],correct:0,icon:"mtr"},{q:"哪一個字的尾音與「Sun」相同？",opts:["Fun","Sit","Bus","Cat"],correct:0,icon:"sun"},{q:"哪一個字的尾音與「Pen」相同？",opts:["Ten","Tap","Tip","Top"],correct:0,icon:"ruler"},{q:"哪一個字的尾音與「Bag」相同？",opts:["Tag","Sit","Sun","Bus"],correct:0,icon:"schoolbag"},{q:"哪一個字的尾音與「Big」相同？",opts:["Pig","Cat","Sun","Bus"],correct:0,icon:"dog"},{q:"哪一個字的尾音與「Bus」相同？",opts:["Gas","Dog","Cat","Sun"],correct:0,icon:"minibus"},{q:"哪一個字的尾音與「Fun」相同？",opts:["Run","Fig","Cat","Top"],correct:0,icon:"ball"}]},
+{id:"phonics_u2",tier:2,stars:1,name:"拼音第二關：尾音配對 Final Sounds",goal:7,time:70,preview:[{word:"Hat",icon:"familyhouse",meaning:"帽子"},{word:"Map",icon:"mtr",meaning:"地圖"},{word:"Bus",icon:"minibus",meaning:"巴士"},{word:"Pen",icon:"ruler",meaning:"筆"},{word:"Dog",icon:"dog",meaning:"狗"}],questions:[{q:"哪一個字的尾音與「Cat」相同？",opts:["Hat", "Cap", "Can", "Car"],correct:0,icon:"cat"},{q:"哪一個字的尾音與「Dog」相同？",opts:["Log", "Cat", "Bus", "Sun"],correct:0,icon:"dog"},{q:"哪一個字的尾音與「Ball」相同？",opts:["Wall", "Bus", "Cat", "Sun"],correct:0,icon:"ball"},{q:"哪一個字的尾音與「Map」相同？",opts:["Cap", "Cat", "Bus", "Sun"],correct:0,icon:"mtr"},{q:"哪一個字的尾音與「Sun」相同？",opts:["Fun", "Sit", "Bus", "Cat"],correct:0,icon:"sun"},{q:"哪一個字的尾音與「Pen」相同？",opts:["Ten", "Tap", "Tip", "Top"],correct:0,icon:"ruler"},{q:"哪一個字的尾音與「Bag」相同？",opts:["Tag", "Sit", "Sun", "Bus"],correct:0,icon:"schoolbag"},{q:"哪一個字的尾音與「Big」相同？",opts:["Pig", "Cat", "Sun", "Bus"],correct:0,icon:"dog"},{q:"哪一個字的尾音與「Bus」相同？",opts:["Gas", "Dog", "Cat", "Sun"],correct:0,icon:"minibus"},{q:"哪一個字的尾音與「Fun」相同？",opts:["Run", "Fig", "Cat", "Top"],correct:0,icon:"ball"}]},
 {id:"phonics_u3",tier:3,stars:2,name:"拼音第三關：中間音與拼讀 Middle Sounds",goal:7,time:70,preview:[{word:"Cat",icon:"cat",meaning:"貓 (a音)"},{word:"Dog",icon:"dog",meaning:"狗 (o音)"},{word:"Sun",icon:"sun",meaning:"太陽 (u音)"},{word:"Pen",icon:"ruler",meaning:"筆 (e音)"},{word:"Big",icon:"dog",meaning:"大 (i音)"}],questions:[{q:"哪一個字的中間音與「Cat」相同 (a)？",opts:["Bag", "Dog", "Sun", "Bus"],correct:0,icon:"schoolbag"},{q:"哪一個字的中間音與「Dog」相同 (o)？",opts:["Top", "Cat", "Sun", "Bus"],correct:0,icon:"slide"},{q:"哪一個字的中間音與「Sun」相同 (u)？",opts:["Fun", "Cat", "Dog", "Pen"],correct:0,icon:"ball"},{q:"哪一個字的中間音與「Pen」相同 (e)？",opts:["Ten", "Cat", "Dog", "Sun"],correct:0,icon:"ruler"},{q:"哪一個字的中間音與「Big」相同 (i)？",opts:["Pig", "Cat", "Dog", "Sun"],correct:0,icon:"dog"},{q:"哪一個字讀 /k-a-t/？",opts:["Cat", "Cop", "Cup", "Cut"],correct:0,icon:"cat"},{q:"哪一個字讀 /d-o-g/？",opts:["Dig", "Dog", "Dug", "Deg"],correct:1,icon:"dog"},{q:"哪一個字讀 /s-u-n/？",opts:["Sin", "Son", "Sun", "San"],correct:2,icon:"sun"},{q:"哪一個字讀 /p-e-n/？",opts:["Pin", "Pen", "Pan", "Pun"],correct:1,icon:"ruler"},{q:"哪一個字讀 /b-i-g/？",opts:["Bag", "Big", "Bug", "Beg"],correct:1,icon:"dog"}]},
 {id:"phonics_u4",tier:4,stars:3,name:"拼音第四關：押韻大挑戰 Rhyming Challenge",goal:8,time:75,preview:[{word:"Cat / Hat",icon:"cat",meaning:"押韻: at"},{word:"Dog / Fog",icon:"dog",meaning:"押韻: og"},{word:"Sun / Fun",icon:"sun",meaning:"押韻: un"},{word:"Bag / Tag",icon:"schoolbag",meaning:"押韻: ag"},{word:"Big / Pig",icon:"dog",meaning:"押韻: ig"}],questions:[{q:"哪一個字與「Cat」押韻？",opts:["Hat", "Dog", "Sun", "Bus"],correct:0,icon:"cat"},{q:"哪一個字與「Dog」押韻？",opts:["Fog", "Cat", "Sun", "Bus"],correct:0,icon:"dog"},{q:"哪一個字與「Sun」押韻？",opts:["Cat", "Fun", "Dog", "Bag"],correct:1,icon:"sun"},{q:"哪一個字與「Bag」押韻？",opts:["Tag", "Dog", "Sun", "Bus"],correct:0,icon:"schoolbag"},{q:"哪一個字與「Big」押韻？",opts:["Pig", "Bag", "Sun", "Bus"],correct:0,icon:"dog"},{q:"哪一個字與「Pen」押韻？",opts:["Ten", "Pan", "Pin", "Pun"],correct:0,icon:"ruler"},{q:"哪一個字與「Map」押韻？",opts:["Cap", "Cat", "Bus", "Sun"],correct:0,icon:"mtr"},{q:"哪一個字與「Net」押韻？",opts:["Wet", "Nut", "Nat", "Not"],correct:0,icon:"ball"},{q:"哪一個字與「Van」押韻？",opts:["Man", "Ven", "Vin", "Von"],correct:0,icon:"minibus"},{q:"哪一個字與「Red」押韻？",opts:["Bed", "Rid", "Rad", "Rud"],correct:0,icon:"apple"}]},
 {id:"phonics_u5",tier:5,stars:3,name:"拼音第五關：連音組合 Consonant Blends (P2)",goal:8,time:75,preview:[{word:"Stop",icon:"runner",meaning:"停 (st-)"},{word:"Frog",icon:"whale",meaning:"青蛙 (fr-)"},{word:"Plan",icon:"table",meaning:"計劃 (pl-)"},{word:"Grass",icon:"cloud",meaning:"草 (gr-)"},{word:"Clock",icon:"watch_clock",meaning:"鐘 (cl-)"}],questions:[{q:"哪一個字以「st-」連音開始？",opts:["Stop", "Dog", "Sun", "Bag"],correct:0,icon:"runner"},{q:"哪一個字以「fr-」連音開始？",opts:["Frog", "Cat", "Bus", "Pen"],correct:0,icon:"whale"},{q:"哪一個字以「pl-」連音開始？",opts:["Plan", "Sun", "Dog", "Map"],correct:0,icon:"table"},{q:"哪一個字以「gr-」連音開始？",opts:["Grass", "Cat", "Bag", "Pen"],correct:0,icon:"cloud"},{q:"哪一個字以「cl-」連音開始？",opts:["Clock", "Sun", "Dog", "Bus"],correct:0,icon:"watch_clock"},{q:"哪一個字以「bl-」連音開始？",opts:["Black", "Cat", "Sun", "Map"],correct:0,icon:"cloud"},{q:"哪一個字以「dr-」連音開始？",opts:["Drum", "Bag", "Dog", "Pen"],correct:0,icon:"table"},{q:"哪一個字以「sw-」連音開始？",opts:["Swim", "Cat", "Bus", "Sun"],correct:0,icon:"whale"},{q:"哪一個字以「tr-」連音開始？",opts:["Train", "Dog", "Bag", "Map"],correct:0,icon:"runner"},{q:"哪一個字以「sn-」連音開始？",opts:["Snake", "Sun", "Cat", "Bus"],correct:0,icon:"cloud"}]},
 {id:"phonics_u6",tier:6,stars:3,name:"拼音第六關：雙字母音 Digraphs (P2)",goal:8,time:75,preview:[{word:"Ship",icon:"ferry",meaning:"船 (sh)"},{word:"Chair",icon:"chair",meaning:"椅子 (ch)"},{word:"Think",icon:"happy",meaning:"想 (th)"},{word:"Whale",icon:"whale",meaning:"鯨魚 (wh)"},{word:"Photo",icon:"book",meaning:"相片 (ph)"}],questions:[{q:"哪一個字包含「sh」雙字母音？",opts:["Ship", "Cat", "Bus", "Dog"],correct:0,icon:"ferry"},{q:"哪一個字包含「ch」雙字母音？",opts:["Chair", "Sun", "Bag", "Pen"],correct:0,icon:"chair"},{q:"哪一個字包含「th」雙字母音？",opts:["Think", "Dog", "Cat", "Bus"],correct:0,icon:"happy"},{q:"哪一個字包含「wh」雙字母音？",opts:["Whale", "Sun", "Map", "Bag"],correct:0,icon:"whale"},{q:"哪一個字包含「ph」雙字母音？",opts:["Photo", "Cat", "Dog", "Bus"],correct:0,icon:"book"},{q:"「Fish」中的「sh」讀音與哪個字相同？",opts:["Wish", "Cat", "Dog", "Sun"],correct:0,icon:"ferry"},{q:"「Chip」中的「ch」讀音與哪個字相同？",opts:["Chin", "Sun", "Bag", "Pen"],correct:0,icon:"chair"},{q:"「Bath」中的「th」讀音與哪個字相同？",opts:["Path", "Dog", "Cat", "Bus"],correct:0,icon:"happy"},{q:"哪一個字以「wh-」開始並代表動物？",opts:["Whale", "Cat", "Dog", "Bird"],correct:0,icon:"whale"},{q:"哪一個字包含「ch」並代表傢俱？",opts:["Chair", "Table", "Bag", "Book"],correct:0,icon:"chair"}]},
 {id:"phonics_u7",tier:7,stars:3,name:"拼音第七關：默音e Silent E (P2)",goal:9,time:85,preview:[{word:"Cake",icon:"cheese",meaning:"蛋糕 (a_e)"},{word:"Bike",icon:"runner",meaning:"單車 (i_e)"},{word:"Home",icon:"familyhouse",meaning:"家 (o_e)"},{word:"Cute",icon:"chick",meaning:"可愛 (u_e)"},{word:"Time",icon:"watch_clock",meaning:"時間 (i_e)"}],questions:[{q:"哪一個字有默音e令a讀長音？",opts:["Cake", "Cat", "Bag", "Sun"],correct:0,icon:"cheese"},{q:"哪一個字有默音e令i讀長音？",opts:["Bike", "Big", "Dog", "Bus"],correct:0,icon:"runner"},{q:"哪一個字有默音e令o讀長音？",opts:["Home", "Dog", "Cat", "Bag"],correct:0,icon:"familyhouse"},{q:"哪一個字有默音e令u讀長音？",opts:["Cute", "Sun", "Bus", "Cat"],correct:0,icon:"chick"},{q:"哪一個字有默音e令i讀長音（表示時鐘）？",opts:["Time", "Dog", "Bag", "Sun"],correct:0,icon:"watch_clock"},{q:"「Cap」加上默音e會變成甚麼字？",opts:["Cape", "Cat", "Bag", "Sun"],correct:0,icon:"cheese"},{q:"「Rid」加上默音e會變成甚麼字？",opts:["Ride", "Dog", "Bus", "Cat"],correct:0,icon:"runner"},{q:"「Rob」加上默音e會變成甚麼字？",opts:["Robe", "Dog", "Cat", "Sun"],correct:0,icon:"familyhouse"},{q:"哪一個字讀音是 /keɪk/？",opts:["Cake", "Cak", "Cat", "Cap"],correct:0,icon:"cheese"},{q:"哪一個字讀音是 /baɪk/？",opts:["Bike", "Bik", "Big", "Bit"],correct:0,icon:"runner"}]},
-{id:"phonics_u8",tier:8,stars:3,name:"拼音第八關：母音組合 Vowel Teams (P2)",goal:9,time:85,preview:[{word:"Rain",icon:"rain",meaning:"雨 (ai)"},{word:"Boat",icon:"boat",meaning:"船 (oa)"},{word:"Bee",icon:"bee",meaning:"蜜蜂 (ee)"},{word:"Tree",icon:"cloud",meaning:"樹 (ee)"},{word:"Pie",icon:"cheese",meaning:"批 (ie)"}],questions:[{q:"哪一個字包含「ai」母音組合？",opts:["Rain","Boat","Bee","Sun"],correct:0,icon:"rain"},{q:"哪一個字包含「oa」母音組合？",opts:["Boat","Rain","Bee","Dog"],correct:0,icon:"boat"},{q:"哪一個字包含「ee」母音組合？",opts:["Bee","Boat","Rain","Cat"],correct:0,icon:"bee"},{q:"哪一個字包含「ee」並代表植物？",opts:["Tree","Boat","Rain","Bee"],correct:0,icon:"cloud"},{q:"「ai」在「Rain」中的讀音與哪個字相同？",opts:["Train","Boat","Bee","Sun"],correct:0,icon:"rain"},{q:"「oa」在「Boat」中的讀音與哪個字相同？",opts:["Coat","Rain","Bee","Dog"],correct:0,icon:"boat"},{q:"哪一個字包含「ea」母音組合？",opts:["Sea","Boat","Bee","Cat"],correct:0,icon:"whale"},{q:"哪一個字包含「oo」母音組合？",opts:["Moon","Boat","Rain","Bee"],correct:0,icon:"moon"},{q:"「Tree」和「Bee」的母音組合讀音是否相同？選出正確答案",opts:["相同","不同","冇母音組合","唔知道"],correct:0,icon:"bee"},{q:"哪一個字包含「ie」母音組合？",opts:["Pie","Boat","Rain","Bee"],correct:0,icon:"cheese"}]},
-{id:"phonics_u9",tier:9,stars:3,name:"拼音第九關：R控制母音 R-Controlled Vowels (P2)",goal:9,time:85,preview:[{word:"Car",icon:"taxi",meaning:"汽車 (ar)"},{word:"Bird",icon:"bird",meaning:"小鳥 (ir)"},{word:"Corn",icon:"corn",meaning:"玉米 (or)"},{word:"Turtle",icon:"turtle",meaning:"烏龜 (ur)"},{word:"Her",icon:"happy",meaning:"她的 (er)"}],questions:[{q:"哪一個字包含「ar」R控制母音？",opts:["Car","Bird","Corn","Sun"],correct:0,icon:"taxi"},{q:"哪一個字包含「ir」R控制母音？",opts:["Bird","Car","Corn","Dog"],correct:0,icon:"bird"},{q:"哪一個字包含「or」R控制母音？",opts:["Corn","Car","Bird","Cat"],correct:0,icon:"corn"},{q:"哪一個字包含「ur」R控制母音？",opts:["Turtle","Car","Corn","Bag"],correct:0,icon:"turtle"},{q:"哪一個字包含「er」R控制母音？",opts:["Her","Car","Bird","Sun"],correct:0,icon:"happy"},{q:"「Car」中的「ar」讀音與哪個字相同？",opts:["Star","Bird","Corn","Sun"],correct:0,icon:"star"},{q:"「Bird」中的「ir」讀音與哪個字相同？",opts:["Girl","Car","Corn","Bag"],correct:0,icon:"bird"},{q:"「Corn」中的「or」讀音與哪個字相同？",opts:["Fork","Car","Bird","Sun"],correct:0,icon:"corn"},{q:"R控制母音嘅特點係咩？",opts:["母音受R影響改變讀音","母音完全冇聲","R唔發音","冇特別規則"],correct:0,icon:"turtle"},{q:"哪一個字包含「ar」並代表水果？",opts:["Star fruit","Bird","Corn","Turtle"],correct:0,icon:"star"}]},
-{id:"phonics_u10",tier:10,stars:3,name:"拼音第十關：多音節詞 Multi-Syllable Words (P2)",goal:10,time:90,preview:[{word:"Rabbit",icon:"cow",meaning:"兔子 (2音節)"},{word:"Elephant",icon:"cow",meaning:"象 (3音節)"},{word:"Butterfly",icon:"bee",meaning:"蝴蝶 (3音節)"},{word:"Basketball",icon:"ball",meaning:"籃球 (3音節)"},{word:"Umbrella",icon:"umbrella",meaning:"雨傘 (3音節)"}],questions:[{q:"「Rabbit」呢個字有幾多個音節？",opts:["2個","1個","3個","4個"],correct:0,icon:"cow"},{q:"「Elephant」呢個字有幾多個音節？",opts:["3個","1個","2個","4個"],correct:0,icon:"cow"},{q:"「Butterfly」呢個字有幾多個音節？",opts:["3個","1個","2個","4個"],correct:0,icon:"bee"},{q:"「Basketball」呢個字有幾多個音節？",opts:["3個","1個","2個","4個"],correct:0,icon:"ball"},{q:"「Umbrella」呢個字有幾多個音節？",opts:["3個","1個","2個","4個"],correct:0,icon:"umbrella"},{q:"拆分音節有咩用處？",opts:["幫助拼讀長單字","令單字變短","改變單字意思","冇用處"],correct:0,icon:"book"},{q:"「Pencil」呢個字有幾多個音節？",opts:["2個","1個","3個","4個"],correct:0,icon:"pencilcase"},{q:"「Dinosaur」呢個字有幾多個音節？",opts:["3個","1個","2個","4個"],correct:0,icon:"turtle"},{q:"「Table」呢個字有幾多個音節？",opts:["2個","1個","3個","4個"],correct:0,icon:"table"},{q:"「Computer」呢個字有幾多個音節？",opts:["3個","1個","2個","4個"],correct:0,icon:"clock"}]}
+{id:"phonics_u8",tier:8,stars:2,name:"拼音第八關：母音組合 Vowel Teams (P2)",goal:9,time:85,preview:[{word:"Rain",icon:"rain",meaning:"雨"},{word:"Boat",icon:"ferry",meaning:"船"},{word:"Moon",icon:"moon",meaning:"月亮"},{word:"Cloud",icon:"cloud",meaning:"雲"},{word:"Star",icon:"star",meaning:"星星"}],questions:[{q:"哪一個字包含「ai」母音組合？",opts:["Rain","Boat","Sun","Dog"],correct:0,icon:"rain"},{q:"哪一個字包含「oa」母音組合？",opts:["Boat","Rain","Sun","Dog"],correct:0,icon:"ferry"},{q:"哪一個字包含「oo」母音組合？",opts:["Moon","Boat","Rain","Cat"],correct:0,icon:"moon"},{q:"哪一個字包含「ou」母音組合？",opts:["Cloud","Boat","Rain","Dog"],correct:0,icon:"cloud"},{q:"「ai」在「Rain」中的讀音與哪個字相同？",opts:["Train","Boat","Sun","Dog"],correct:0,icon:"rain"},{q:"「oa」在「Boat」中的讀音與哪個字相同？",opts:["Coat","Rain","Sun","Dog"],correct:0,icon:"ferry"},{q:"哪一個字包含「oo」並代表天空物體？",opts:["Moon","Boat","Rain","Star"],correct:0,icon:"moon"},{q:"哪一個字包含「ou」並代表天氣現象？",opts:["Cloud","Boat","Rain","Sun"],correct:0,icon:"cloud"},{q:"哪一個字包含「ar」母音字母組合並代表天體？",opts:["Star","Boat","Rain","Cloud"],correct:0,icon:"star"},{q:"母音組合嘅特點係咩？",opts:["兩個母音字母組合發一個音","冇特別讀音","只喺句尾出現","同輔音一樣"],correct:0,icon:"book"}]},
+{id:"phonics_u9",tier:9,stars:3,name:"拼音第九關：R控制母音 R-Controlled Vowels (P2)",goal:9,time:85,preview:[{word:"Star",icon:"star",meaning:"星星"},{word:"Bird",icon:"bird",meaning:"鳥"},{word:"Chair",icon:"chair",meaning:"椅子"},{word:"Corn",icon:"apple",meaning:"玉米"},{word:"Runner",icon:"runner",meaning:"跑步者"}],questions:[{q:"哪一個字包含「ar」R控制母音？",opts:["Star","Bird","Chair","Sun"],correct:0,icon:"star"},{q:"哪一個字包含「ir」R控制母音？",opts:["Bird","Star","Chair","Dog"],correct:0,icon:"bird"},{q:"哪一個字包含「air」R控制母音組合？",opts:["Chair","Star","Bird","Cat"],correct:0,icon:"chair"},{q:"哪一個字包含「or」R控制母音？",opts:["Corn","Star","Bird","Chair"],correct:0,icon:"apple"},{q:"哪一個字包含「ur」R控制母音？",opts:["Runner","Star","Bird","Corn"],correct:0,icon:"runner"},{q:"「Star」中的「ar」讀音與哪個字相同？",opts:["Car","Bird","Chair","Sun"],correct:0,icon:"star"},{q:"「Bird」中的「ir」讀音與哪個字相同？",opts:["Girl","Star","Chair","Corn"],correct:0,icon:"bird"},{q:"「Chair」中的「air」讀音與哪個字相同？",opts:["Fair","Star","Bird","Corn"],correct:0,icon:"chair"},{q:"R控制母音嘅特點係咩？",opts:["母音受R影響改變讀音","母音完全冇聲","R唔發音","冇特別規則"],correct:0,icon:"book"},{q:"哪一個字包含「or」並代表植物？",opts:["Corn","Star","Bird","Chair"],correct:0,icon:"apple"}]},
+{id:"phonics_u10",tier:10,stars:3,name:"拼音第十關：多音節詞 Multi-Syllable Words (P2)",goal:10,time:90,preview:[{word:"Rabbit",icon:"cat",meaning:"兔子"},{word:"Umbrella",icon:"umbrella",meaning:"雨傘"},{word:"Pencilcase",icon:"pencilcase",meaning:"筆盒"},{word:"Teacher",icon:"teacher",meaning:"老師"},{word:"Classmates",icon:"classmates",meaning:"同學"}],questions:[{q:"「Rabbit」呢個字有幾多個音節？",opts:["2個","1個","3個","4個"],correct:0,icon:"cat"},{q:"「Umbrella」呢個字有幾多個音節？",opts:["3個","1個","2個","4個"],correct:0,icon:"umbrella"},{q:"「Pencilcase」呢個字有幾多個音節？",opts:["3個","1個","2個","4個"],correct:0,icon:"pencilcase"},{q:"「Teacher」呢個字有幾多個音節？",opts:["2個","1個","3個","4個"],correct:0,icon:"teacher"},{q:"「Classmates」呢個字有幾多個音節？",opts:["2個","1個","3個","4個"],correct:0,icon:"classmates"},{q:"拆分音節有咩用處？",opts:["幫助拼讀長單字","令單字變短","改變單字意思","冇用處"],correct:0,icon:"book"},{q:"「Schoolbag」呢個字有幾多個音節？",opts:["2個","1個","3個","4個"],correct:0,icon:"schoolbag"},{q:"「Playground」呢個字有幾多個音節？",opts:["2個","1個","3個","4個"],correct:0,icon:"playground_scene"},{q:"「Watermelon」類似結構嘅字通常有幾多個音節？",opts:["3個或以上","1個","冇音節","0個"],correct:0,icon:"apple"},{q:"「Butterfly」呢個字有幾多個音節？",opts:["3個","1個","2個","4個"],correct:0,icon:"cat"}]}
 ];
 
 const VOCAB_UNITS = [
@@ -404,8 +417,17 @@ const VOCAB_UNITS = [
 {id:"vocab_u5",tier:5,stars:3,name:"詞彙第五關：公園與天氣 Park & Weather",goal:8,time:75,preview:[{word:"Slide",icon:"slide",meaning:"滑梯"},{word:"Ball",icon:"ball",meaning:"球"},{word:"Sun",icon:"sun",meaning:"太陽"},{word:"Cloud",icon:"cloud",meaning:"雲"},{word:"Rain",icon:"rain",meaning:"雨"}],questions:[{q:"在公園裡可以玩耍的設施是甚麼？",opts:["Slide", "Book", "Ruler", "Bus"],correct:0,icon:"slide"},{q:"用來踢或拍打的圓形物件稱為甚麼？",opts:["Ball", "Book", "Bag", "Ruler"],correct:0,icon:"ball"},{q:"天空中發光發熱的天體是甚麼？",opts:["Moon", "Sun", "Star", "Cloud"],correct:1,icon:"sun"},{q:"每天早上升起的天體是甚麼？",opts:["Sun", "Moon", "Star", "Cloud"],correct:0,icon:"sun"},{q:"天空中白色軟綿綿的東西稱為甚麼？",opts:["Cloud", "Sun", "Moon", "Star"],correct:0,icon:"cloud"},{q:"下雨天需要帶的物品是甚麼？",opts:["Umbrella", "Ruler", "Ball", "Book"],correct:0,icon:"umbrella"},{q:"晚上在天空發光的圓形天體稱為甚麼？",opts:["Moon", "Sun", "Cloud", "Star"],correct:0,icon:"moon"},{q:"夜空中閃爍的細小光點稱為甚麼？",opts:["Star", "Moon", "Sun", "Cloud"],correct:0,icon:"star"},{q:"放學後可以前往哪裡玩滑梯？",opts:["Playground", "Hospital", "Office", "Bank"],correct:0,icon:"playground_scene"}]},
 {id:"vocab_u6",tier:6,stars:3,name:"詞彙第六關：情緒與感覺 Feelings (P2)",goal:8,time:75,preview:[{word:"Happy",icon:"happy",meaning:"開心"},{word:"Sad",icon:"sad",meaning:"傷心"},{word:"Tired",icon:"sad",meaning:"疲倦"},{word:"Excited",icon:"happy",meaning:"興奮"},{word:"Scared",icon:"sad",meaning:"驚慌"}],questions:[{q:"考試得到滿分時的心情是甚麼？",opts:["Happy", "Sad", "Tired", "Scared"],correct:0,icon:"happy"},{q:"弄丟心愛玩具時的心情是甚麼？",opts:["Sad", "Happy", "Excited", "Cute"],correct:0,icon:"sad"},{q:"跑步很久之後身體感覺如何？",opts:["Tired", "Happy", "Excited", "Cute"],correct:0,icon:"sad"},{q:"即將去迪士尼樂園時的心情是甚麼？",opts:["Excited", "Sad", "Tired", "Angry"],correct:0,icon:"happy"},{q:"看到怪獸電影時可能感覺怎樣？",opts:["Scared", "Happy", "Cute", "Tired"],correct:0,icon:"sad"},{q:"與朋友玩耍時通常感覺怎樣？",opts:["Happy", "Sad", "Scared", "Tired"],correct:0,icon:"happy"},{q:"生病時身體通常感覺怎樣？",opts:["Tired", "Excited", "Happy", "Cute"],correct:0,icon:"sad"},{q:"收到生日禮物時心情如何？",opts:["Happy", "Sad", "Scared", "Tired"],correct:0,icon:"happy"},{q:"哪一個字用來形容小狗小貓可愛？",opts:["Cute", "Sad", "Scared", "Tired"],correct:0,icon:"chick"}]},
 {id:"vocab_u7",tier:7,stars:3,name:"詞彙第七關：日常動作 Daily Actions (P2)",goal:8,time:75,preview:[{word:"Run",icon:"runner",meaning:"跑"},{word:"Jump",icon:"jumper",meaning:"跳"},{word:"Swim",icon:"whale",meaning:"游泳"},{word:"Read",icon:"book",meaning:"閱讀"},{word:"Write",icon:"pencilcase",meaning:"寫字"}],questions:[{q:"用雙腳快速移動的動作稱為甚麼？",opts:["Run", "Swim", "Read", "Sleep"],correct:0,icon:"runner"},{q:"雙腳離地跳起的動作稱為甚麼？",opts:["Jump", "Run", "Write", "Eat"],correct:0,icon:"jumper"},{q:"在水中活動的動作稱為甚麼？",opts:["Swim", "Jump", "Run", "Sleep"],correct:0,icon:"whale"},{q:"看書認字的動作稱為甚麼？",opts:["Read", "Swim", "Jump", "Run"],correct:0,icon:"book"},{q:"用筆記下文字的動作稱為甚麼？",opts:["Write", "Read", "Swim", "Jump"],correct:0,icon:"pencilcase"},{q:"用嘴巴進食的動作稱為甚麼？",opts:["Eat", "Run", "Write", "Swim"],correct:0,icon:"cheese"},{q:"閉上眼睛休息的動作稱為甚麼？",opts:["Sleep", "Run", "Jump", "Eat"],correct:0,icon:"sad"},{q:"用手拿起物件的動作稱為甚麼？",opts:["Hold", "Run", "Swim", "Sleep"],correct:0,icon:"thumb"},{q:"每天早上洗臉刷牙前會先做甚麼？",opts:["Wake up", "Sleep", "Swim", "Jump"],correct:0,icon:"sun"}]},
-{id:"vocab_u8",tier:8,stars:3,name:"詞彙第八關：星期與數字 Days & Numbers (P2)",goal:9,time:85,preview:[{word:"Monday",icon:"watch_clock",meaning:"星期一"},{word:"Five",icon:"number_five",meaning:"五"},{word:"Ten",icon:"number_five",meaning:"十"},{word:"Yesterday",icon:"watch_clock",meaning:"昨天"},{word:"Tomorrow",icon:"sun",meaning:"明天"}],questions:[{q:"一星期的第一個上學日稱為甚麼？",opts:["Monday", "Sunday", "Saturday", "Friday"],correct:0,icon:"watch_clock"},{q:"一星期中最後一天（假日）稱為甚麼？",opts:["Sunday", "Monday", "Tuesday", "Wednesday"],correct:0,icon:"sun"},{q:"數字「5」用英文怎樣寫？",opts:["Five", "Four", "Six", "Seven"],correct:0,icon:"number_five"},{q:"數字「10」用英文怎樣寫？",opts:["Ten", "Nine", "Eleven", "Eight"],correct:0,icon:"number_five"},{q:"「昨天」用英文怎樣說？",opts:["Yesterday", "Tomorrow", "Today", "Tonight"],correct:0,icon:"watch_clock"},{q:"「明天」用英文怎樣說？",opts:["Tomorrow", "Yesterday", "Today", "Tonight"],correct:0,icon:"sun"},{q:"一星期總共有多少天？",opts:["Seven", "Five", "Six", "Eight"],correct:0,icon:"watch_clock"},{q:"數字「3」加「2」等於甚麼？",opts:["Five", "Four", "Six", "Seven"],correct:0,icon:"number_five"},{q:"「今天」用英文怎樣說？",opts:["Today", "Yesterday", "Tomorrow", "Tonight"],correct:0,icon:"sun"},{q:"星期六和星期日合稱為甚麼？",opts:["Weekend", "Weekday", "Holiday", "Morning"],correct:0,icon:"watch_clock"}]}
+{id:"vocab_u8",tier:8,stars:3,name:"詞彙第八關：星期與數字 Days & Numbers (P2)",goal:9,time:85,preview:[{word:"Monday",icon:"watch_clock",meaning:"星期一"},{word:"Five",icon:"number_five",meaning:"五"},{word:"Ten",icon:"number_five",meaning:"十"},{word:"Yesterday",icon:"watch_clock",meaning:"昨天"},{word:"Tomorrow",icon:"sun",meaning:"明天"}],questions:[{q:"一星期的第一個上學日稱為甚麼？",opts:["Monday", "Sunday", "Saturday", "Friday"],correct:0,icon:"watch_clock"},{q:"一星期中最後一天（假日）稱為甚麼？",opts:["Sunday", "Monday", "Tuesday", "Wednesday"],correct:0,icon:"sun"},{q:"數字「5」用英文怎樣寫？",opts:["Five", "Four", "Six", "Seven"],correct:0,icon:"number_five"},{q:"數字「10」用英文怎樣寫？",opts:["Ten", "Nine", "Eleven", "Eight"],correct:0,icon:"number_five"},{q:"「昨天」用英文怎樣說？",opts:["Yesterday", "Tomorrow", "Today", "Tonight"],correct:0,icon:"watch_clock"},{q:"「明天」用英文怎樣說？",opts:["Tomorrow", "Yesterday", "Today", "Tonight"],correct:0,icon:"sun"},{q:"一星期總共有多少天？",opts:["Seven", "Five", "Six", "Eight"],correct:0,icon:"watch_clock"},{q:"數字「3」加「2」等於甚麼？",opts:["Five", "Four", "Six", "Seven"],correct:0,icon:"number_five"},{q:"「今天」用英文怎樣說？",opts:["Today", "Yesterday", "Tomorrow", "Tonight"],correct:0,icon:"sun"},{q:"星期六和星期日合稱為甚麼？",opts:["Weekend", "Weekday", "Holiday", "Morning"],correct:0,icon:"watch_clock"}]},
+{id:"vocab_u9",tier:9,stars:2,name:"詞彙第九關：社區設施 Community Places (P3)",goal:8,time:70,preview:[{word:"Library",icon:"library",meaning:"圖書館"},{word:"Park",icon:"park",meaning:"公園"},{word:"Supermarket",icon:"supermarket",meaning:"超級市場"},{word:"Hospital",icon:"hospital",meaning:"醫院"},{word:"Police Station",icon:"police_station",meaning:"警署"}],questions:[{q:"哪裡可以借書閱讀？",opts:["Library","Park","Supermarket","Hospital"],correct:0,icon:"library"},{q:"哪裡有滑梯同鞦韆？",opts:["Park","Library","Hospital","Police Station"],correct:0,icon:"park"},{q:"哪裡可以買到日常用品？",opts:["Supermarket","Park","Hospital","Library"],correct:0,icon:"supermarket"},{q:"邊個地方係救治病人嘅？",opts:["Hospital","Park","Library","Supermarket"],correct:0,icon:"hospital"},{q:"邊個地方負責維持社會治安？",opts:["Police Station","Library","Park","Hospital"],correct:0,icon:"police_station"},{q:"\"I borrow books from the ___.\"",opts:["library","park","hospital","supermarket"],correct:0,icon:"library"},{q:"\"We play football in the ___.\"",opts:["park","library","hospital","police station"],correct:0,icon:"park"},{q:"\"Mum buys food at the ___.\"",opts:["supermarket","park","library","hospital"],correct:0,icon:"supermarket"},{q:"\"The doctor works at the ___.\"",opts:["hospital","park","supermarket","library"],correct:0,icon:"hospital"},{q:"\"The police officer works at the ___.\"",opts:["police station","park","library","hospital"],correct:0,icon:"police_station"}]},
+{id:"vocab_u10",tier:10,stars:2,name:"詞彙第十關：興趣運動 Hobbies & Sports (P3)",goal:8,time:70,preview:[{word:"Swimming",icon:"swimmer",meaning:"游泳"},{word:"Drawing",icon:"paintbrush",meaning:"畫畫"},{word:"Football",icon:"soccerball",meaning:"足球"},{word:"Reading",icon:"book",meaning:"閱讀"},{word:"Cycling",icon:"bicycle",meaning:"踩單車"}],questions:[{q:"邊項活動係喺水中進行？",opts:["Swimming","Drawing","Reading","Cycling"],correct:0,icon:"swimmer"},{q:"邊項活動需要用畫筆？",opts:["Drawing","Swimming","Football","Cycling"],correct:0,icon:"paintbrush"},{q:"邊項活動用腳踢球？",opts:["Football","Reading","Drawing","Swimming"],correct:0,icon:"soccerball"},{q:"邊項活動係睇書？",opts:["Reading","Football","Cycling","Swimming"],correct:0,icon:"book"},{q:"邊項活動用單車？",opts:["Cycling","Reading","Drawing","Football"],correct:0,icon:"bicycle"},{q:"\"I like ___ in the swimming pool.\"",opts:["swimming","drawing","reading","cycling"],correct:0,icon:"swimmer"},{q:"\"She is good at ___ pictures.\"",opts:["drawing","swimming","football","cycling"],correct:0,icon:"paintbrush"},{q:"\"We play ___ every Saturday.\"",opts:["football","reading","drawing","swimming"],correct:0,icon:"soccerball"},{q:"\"My hobby is ___ story books.\"",opts:["reading","football","cycling","swimming"],correct:0,icon:"book"},{q:"\"He goes ___ to school every day.\"",opts:["cycling","reading","drawing","football"],correct:0,icon:"bicycle"}]},
+{id:"vocab_u11",tier:11,stars:2,name:"詞彙第十一關：季節節日 Seasons & Festivals (P3)",goal:8,time:70,preview:[{word:"Spring",icon:"rain",meaning:"春天"},{word:"Summer",icon:"sun",meaning:"夏天"},{word:"Christmas",icon:"christmas_tree",meaning:"聖誕節"},{word:"Mid-Autumn Festival",icon:"lantern",meaning:"中秋節"},{word:"Chinese New Year",icon:"fireworks",meaning:"農曆新年"}],questions:[{q:"邊個季節多雨？",opts:["Spring","Summer","Christmas","New Year"],correct:0,icon:"rain"},{q:"邊個季節最熱？",opts:["Summer","Spring","Christmas","Mid-Autumn"],correct:0,icon:"sun"},{q:"12月慶祝嘅節日係？",opts:["Christmas","Mid-Autumn Festival","Chinese New Year","Spring"],correct:0,icon:"christmas_tree"},{q:"賞月同食月餅嘅節日係？",opts:["Mid-Autumn Festival","Christmas","Summer","Spring"],correct:0,icon:"lantern"},{q:"派利是嘅節日係？",opts:["Chinese New Year","Christmas","Summer","Spring"],correct:0,icon:"fireworks"},{q:"\"It often rains in ___.\"",opts:["spring","summer","winter","Christmas"],correct:0,icon:"rain"},{q:"\"The weather is hot in ___.\"",opts:["summer","spring","Christmas","Mid-Autumn"],correct:0,icon:"sun"},{q:"\"We give presents at ___.\"",opts:["Christmas","Mid-Autumn Festival","summer","spring"],correct:0,icon:"christmas_tree"},{q:"\"We eat mooncakes at the ___.\"",opts:["Mid-Autumn Festival","Christmas","summer","spring"],correct:0,icon:"lantern"},{q:"\"We watch fireworks during ___.\"",opts:["Chinese New Year","Christmas","summer","spring"],correct:0,icon:"fireworks"}]},
+{id:"vocab_u12",tier:12,stars:2,name:"詞彙第十二關：健康身體 Health & Body Care (P3)",goal:8,time:70,preview:[{word:"Brush teeth",icon:"toothbrush",meaning:"刷牙"},{word:"Wash hands",icon:"soap",meaning:"洗手"},{word:"Exercise",icon:"runner",meaning:"運動"},{word:"Sleep early",icon:"moon",meaning:"早睡"},{word:"Eat vegetables",icon:"vegetable",meaning:"食蔬菜"}],questions:[{q:"邊樣動作可以保持牙齒健康？",opts:["Brush teeth","Wash hands","Exercise","Sleep early"],correct:0,icon:"toothbrush"},{q:"食飯前應該做咩？",opts:["Wash hands","Brush teeth","Exercise","Eat vegetables"],correct:0,icon:"soap"},{q:"邊樣可以令身體強壯？",opts:["Exercise","Wash hands","Sleep early","Brush teeth"],correct:0,icon:"runner"},{q:"幾點瞓覺對身體最好？",opts:["Sleep early","Exercise","Wash hands","Eat vegetables"],correct:0,icon:"moon"},{q:"邊樣食物有益健康？",opts:["Eat vegetables","Brush teeth","Wash hands","Sleep early"],correct:0,icon:"vegetable"},{q:"\"I ___ every morning and night.\"",opts:["brush my teeth","wash hands","exercise","sleep early"],correct:0,icon:"toothbrush"},{q:"\"Please ___ before eating.\"",opts:["wash your hands","brush your teeth","exercise","sleep early"],correct:0,icon:"soap"},{q:"\"We ___ every day to stay healthy.\"",opts:["exercise","wash hands","sleep early","eat vegetables"],correct:0,icon:"runner"},{q:"\"Children should ___ at 9 pm.\"",opts:["sleep early","exercise","wash hands","brush teeth"],correct:0,icon:"moon"},{q:"\"You should ___ for good health.\"",opts:["eat vegetables","sleep early","wash hands","exercise"],correct:0,icon:"vegetable"}]},
+{id:"vocab_u13",tier:13,stars:2,name:"詞彙第十三關：購物金錢 Shopping & Money (P3)",goal:9,time:75,preview:[{word:"Price",icon:"coin",meaning:"價錢"},{word:"Coin",icon:"coin",meaning:"硬幣"},{word:"Banknote",icon:"banknote",meaning:"鈔票"},{word:"Receipt",icon:"receipt",meaning:"收據"},{word:"Discount",icon:"banknote",meaning:"折扣"}],questions:[{q:"買一樣物品要付幾多錢，叫做咩？",opts:["Price","Coin","Receipt","Discount"],correct:0,icon:"coin"},{q:"圓形金屬硬幣叫咩？",opts:["Coin","Banknote","Receipt","Price"],correct:0,icon:"coin"},{q:"紙幣叫咩？",opts:["Banknote","Coin","Receipt","Discount"],correct:0,icon:"banknote"},{q:"購物之後店員俾嘅單據叫咩？",opts:["Receipt","Price","Coin","Banknote"],correct:0,icon:"receipt"},{q:"減價叫咩？",opts:["Discount","Price","Coin","Receipt"],correct:0,icon:"banknote"},{q:"\"What is the ___ of this toy?\"",opts:["price","coin","receipt","discount"],correct:0,icon:"coin"},{q:"\"I have a $10 ___.\"",opts:["coin","banknote","receipt","price"],correct:0,icon:"coin"},{q:"\"She paid with a $100 ___.\"",opts:["banknote","coin","receipt","discount"],correct:0,icon:"banknote"},{q:"\"Keep the ___ for the shop.\"",opts:["receipt","price","coin","discount"],correct:0,icon:"receipt"},{q:"\"This shirt has a 20% ___.\"",opts:["discount","price","coin","receipt"],correct:0,icon:"banknote"}]},
+{id:"vocab_u14",tier:14,stars:2,name:"詞彙第十四關：職業 Jobs & Occupations (P3)",goal:9,time:75,preview:[{word:"Doctor",icon:"teacher",meaning:"醫生"},{word:"Firefighter",icon:"firefighter_hat",meaning:"消防員"},{word:"Chef",icon:"chef_hat",meaning:"廚師"},{word:"Farmer",icon:"tractor",meaning:"農夫"},{word:"Engineer",icon:"gear",meaning:"工程師"}],questions:[{q:"邊個職業係救治病人？",opts:["Doctor","Firefighter","Chef","Farmer"],correct:0,icon:"teacher"},{q:"邊個職業係救火？",opts:["Firefighter","Doctor","Chef","Engineer"],correct:0,icon:"firefighter_hat"},{q:"邊個職業係煮飯？",opts:["Chef","Doctor","Farmer","Engineer"],correct:0,icon:"chef_hat"},{q:"邊個職業係種植物？",opts:["Farmer","Doctor","Chef","Firefighter"],correct:0,icon:"tractor"},{q:"邊個職業係設計機械？",opts:["Engineer","Doctor","Farmer","Chef"],correct:0,icon:"gear"},{q:"\"A ___ helps sick people.\"",opts:["doctor","chef","farmer","engineer"],correct:0,icon:"teacher"},{q:"\"A ___ puts out fires.\"",opts:["firefighter","doctor","chef","farmer"],correct:0,icon:"firefighter_hat"},{q:"\"A ___ cooks food in a restaurant.\"",opts:["chef","doctor","engineer","farmer"],correct:0,icon:"chef_hat"},{q:"\"A ___ grows crops on a farm.\"",opts:["farmer","chef","doctor","firefighter"],correct:0,icon:"tractor"},{q:"\"An ___ builds bridges and machines.\"",opts:["engineer","doctor","chef","farmer"],correct:0,icon:"gear"}]},
+{id:"vocab_u15",tier:15,stars:3,name:"詞彙第十五關：自然環境 Nature & Environment (P3)",goal:9,time:75,preview:[{word:"Forest",icon:"mountain",meaning:"森林"},{word:"River",icon:"river",meaning:"河流"},{word:"Mountain",icon:"mountain",meaning:"山"},{word:"Recycle",icon:"recycle_bin",meaning:"回收"},{word:"Pollution",icon:"cloud",meaning:"污染"}],questions:[{q:"好多樹木嘅地方叫咩？",opts:["Forest","River","Mountain","Pollution"],correct:0,icon:"mountain"},{q:"水流動嘅地方叫咩？",opts:["River","Forest","Mountain","Recycle"],correct:0,icon:"river"},{q:"好高嘅陸地叫咩？",opts:["Mountain","Forest","River","Recycle"],correct:0,icon:"mountain"},{q:"將舊物品循環再用叫咩？",opts:["Recycle","Forest","River","Pollution"],correct:0,icon:"recycle_bin"},{q:"空氣或水受污染叫咩？",opts:["Pollution","Forest","River","Recycle"],correct:0,icon:"cloud"},{q:"\"Many trees grow in the ___.\"",opts:["forest","river","mountain","pollution"],correct:0,icon:"mountain"},{q:"\"Fish live in the ___.\"",opts:["river","forest","mountain","recycle"],correct:0,icon:"river"},{q:"\"We climbed the ___ yesterday.\"",opts:["mountain","river","forest","recycle"],correct:0,icon:"mountain"},{q:"\"We should ___ paper and bottles.\"",opts:["recycle","pollute","waste","forest"],correct:0,icon:"recycle_bin"},{q:"\"Air ___ is bad for our health.\"",opts:["pollution","recycle","forest","river"],correct:0,icon:"cloud"}]},
+{id:"vocab_u16",tier:16,stars:3,name:"詞彙第十六關：形容詞 Adjectives: Size/Texture/Taste (P3)",goal:10,time:80,preview:[{word:"Huge",icon:"whale",meaning:"巨大"},{word:"Tiny",icon:"bird",meaning:"細小"},{word:"Smooth",icon:"ball",meaning:"滑"},{word:"Rough",icon:"mountain",meaning:"粗糙"},{word:"Sour",icon:"orange_fruit",meaning:"酸"}],questions:[{q:"鯨魚咁大隻，可以用邊個形容詞？",opts:["Huge","Tiny","Smooth","Sour"],correct:0,icon:"whale"},{q:"小鳥咁細，可以用邊個形容詞？",opts:["Tiny","Huge","Rough","Sour"],correct:0,icon:"bird"},{q:"皮膚滑溜溜，可以用邊個形容詞？",opts:["Smooth","Rough","Huge","Tiny"],correct:0,icon:"ball"},{q:"石頭表面粗糙，可以用邊個形容詞？",opts:["Rough","Smooth","Huge","Tiny"],correct:0,icon:"mountain"},{q:"檸檬味道酸，可以用邊個形容詞？",opts:["Sour","Smooth","Huge","Rough"],correct:0,icon:"orange_fruit"},{q:"\"The elephant is very ___.\"",opts:["huge","tiny","sour","smooth"],correct:0,icon:"whale"},{q:"\"The ant is ___.\"",opts:["tiny","huge","rough","sour"],correct:0,icon:"bird"},{q:"\"This silk cloth feels ___.\"",opts:["smooth","rough","huge","tiny"],correct:0,icon:"ball"},{q:"\"The tree bark feels ___.\"",opts:["rough","smooth","huge","tiny"],correct:0,icon:"mountain"},{q:"\"The lemon tastes ___.\"",opts:["sour","smooth","huge","rough"],correct:0,icon:"orange_fruit"}]}
 ];
+
 const READING_UNITS = [
 {id:"reading_u1",tier:1,stars:1,name:"閱讀第一關：上學日常 Going to School",goal:3,time:85,preview:[{word:"go to school",icon:"minibus",meaning:"上學"},{word:"schoolbag",icon:"schoolbag",meaning:"書包"},{word:"every morning",icon:"sun",meaning:"每天早上"}],questions:[{passage:"Tom goes to school by minibus every morning. He carries his schoolbag with his book and pencil case.",q:"How does Tom go to school?",opts:["By minibus", "By ferry", "By bicycle", "By MTR"],correct:0,icon:"minibus"},{passage:"Every morning, I put my ruler and pencil case into my schoolbag before going to school.",q:"What does the child put into the schoolbag?",opts:["Ruler and pencil case", "Milk tea and bread", "Ball and slide", "Dog and cat"],correct:0,icon:"schoolbag"},{passage:"My mother packs my schoolbag with a ruler, a pencil case, and my English book every night.",q:"When does mother pack the schoolbag?",opts:["Every night", "Every morning", "Every weekend", "Every holiday"],correct:0,icon:"schoolbag"},{passage:"At school, my teacher gives me a ruler to measure my book. I put it back in my pencil case.",q:"What does the child use to measure the book?",opts:["A ruler", "A ball", "A bag", "A dog"],correct:0,icon:"ruler"},{passage:"My classmates and I read books in the school library every Friday afternoon.",q:"When do they read books?",opts:["Friday afternoon", "Monday morning", "Sunday evening", "Saturday night"],correct:0,icon:"book"},{passage:"Every Saturday, my brother and I visit the library to borrow new storybooks together.",q:"What do they borrow from the library?",opts:["Storybooks", "Toys", "Food", "Clothes"],correct:0,icon:"book"}]},
 {id:"reading_u2",tier:2,stars:1,name:"閱讀第二關：假日出遊 Weekend Outing",goal:3,time:85,preview:[{word:"take the ferry",icon:"ferry",meaning:"搭渡輪"},{word:"dim sum",icon:"dimsum",meaning:"點心"},{word:"family",icon:"familyhouse",meaning:"家庭"}],questions:[{passage:"On Sunday, my family and I take the ferry to Hong Kong Island. We eat dim sum for lunch.",q:"What do they eat for lunch?",opts:["Dim sum", "Egg waffle", "Pizza", "Bread"],correct:0,icon:"dimsum"},{passage:"On Saturday, my father and I take the ferry to see the sea. We enjoy the sunshine.",q:"What do they take to see the sea?",opts:["The ferry", "The MTR", "The minibus", "The bicycle"],correct:0,icon:"ferry"},{passage:"Every Sunday morning, my family takes the ferry across the harbour to visit my aunt.",q:"When do they take the ferry?",opts:["Sunday morning", "Monday evening", "Saturday night", "Friday afternoon"],correct:0,icon:"ferry"},{passage:"After lunch, my family often orders dim sum and enjoys the warm tea at our favourite restaurant.",q:"What does the family order after lunch?",opts:["Dim sum", "Egg waffle", "Milk tea only", "Fruit"],correct:0,icon:"dimsum"},{passage:"We take the MTR to visit my grandmother every weekend. She lives near the park.",q:"How do they visit grandmother?",opts:["By MTR", "By ferry", "By minibus", "By taxi"],correct:0,icon:"mtr"},{passage:"My grandfather lives in a house near the MTR station, so we visit him easily every Sunday.",q:"Where does grandfather live?",opts:["Near the MTR station", "On a boat", "In the library", "At school"],correct:0,icon:"mtr"}]},
@@ -413,34 +435,30 @@ const READING_UNITS = [
 {id:"reading_u4",tier:4,stars:3,name:"閱讀第四關：家中生活 Life at Home",goal:4,time:105,preview:[{word:"pet",icon:"cat",meaning:"寵物"},{word:"feed",icon:"dog",meaning:"餵食"},{word:"every evening",icon:"sun",meaning:"每晚"}],questions:[{passage:"I have a pet dog. My dog is brown. I play with my dog in the park every evening.",q:"What colour is the dog?",opts:["Brown", "Black", "White", "Grey"],correct:0,icon:"dog"},{passage:"My cat likes to sleep on my bed. Every day after school, I feed my cat and play with it.",q:"What does the child do after school?",opts:["Feed and play with the cat", "Go to the library", "Take the MTR", "Eat dim sum"],correct:0,icon:"cat"},{passage:"My little sister loves to feed our pet dog every afternoon after she comes home from school.",q:"Who feeds the pet dog?",opts:["Little sister", "Grandfather", "Teacher", "Classmate"],correct:0,icon:"dog"},{passage:"My family lives in a small house near the park. I like to play with my ball there.",q:"Where is the house located?",opts:["Near the park", "Near the library", "On a boat", "In the sky"],correct:0,icon:"familyhouse"},{passage:"On my way to school, I see the sun shining brightly in the sky. It makes me happy.",q:"What does the child see in the sky?",opts:["The sun", "The moon", "A bird", "A plane"],correct:0,icon:"sun"},{passage:"My mother buys apples and bananas from the market. I eat an apple every morning.",q:"What does the child eat every morning?",opts:["An apple", "A banana", "Dim sum", "An egg waffle"],correct:0,icon:"apple"},{passage:"I keep my pencils and eraser neatly inside my pencil case so I do not lose them at school.",q:"Where does the child keep the pencils?",opts:["Inside the pencil case", "Inside the schoolbag", "On the desk", "In the library"],correct:0,icon:"pencilcase"}]},
 {id:"reading_u5",tier:5,stars:3,name:"閱讀第五關：情緒故事 Feelings Story (P2)",goal:4,time:105,preview:[{word:"happy",icon:"happy",meaning:"開心"},{word:"scared",icon:"sad",meaning:"驚慌"},{word:"excited",icon:"happy",meaning:"興奮"}],questions:[{passage:"Lily felt very excited because she was going to Disneyland with her family this weekend.",q:"Why did Lily feel excited?",opts:["Going to Disneyland", "Losing her toy", "Being sick", "Doing homework"],correct:0,icon:"happy"},{passage:"Tom was scared when he watched the monster movie last night. He hid under his blanket.",q:"What did Tom do when he was scared?",opts:["Hid under his blanket", "Went to school", "Ate dinner", "Played football"],correct:0,icon:"sad"},{passage:"After winning the race, Amy felt very happy and proud of herself. She smiled all day.",q:"How did Amy feel after winning?",opts:["Happy and proud", "Sad and tired", "Scared and worried", "Angry and upset"],correct:0,icon:"happy"},{passage:"Ben felt tired after swimming for two hours. He wanted to rest and drink some water.",q:"Why did Ben feel tired?",opts:["Swimming for two hours", "Reading a book", "Sleeping all day", "Eating breakfast"],correct:0,icon:"sad"},{passage:"When Kate saw her new puppy, she felt so happy that she hugged it right away.",q:"What did Kate do when she saw the puppy?",opts:["Hugged it right away", "Ran away", "Cried loudly", "Fell asleep"],correct:0,icon:"happy"},{passage:"My little brother was sad because he lost his favourite toy car at the playground.",q:"Why was the little brother sad?",opts:["He lost his toy car", "He won a prize", "He ate ice cream", "He went swimming"],correct:0,icon:"sad"},{passage:"We felt excited when the teacher said we would go on a school trip next Friday.",q:"When is the school trip?",opts:["Next Friday", "Yesterday", "This morning", "Last week"],correct:0,icon:"happy"}]},
 {id:"reading_u6",tier:6,stars:3,name:"閱讀第六關：一週活動 Weekly Activities (P2)",goal:4,time:105,preview:[{word:"Monday",icon:"watch_clock",meaning:"星期一"},{word:"swim",icon:"whale",meaning:"游泳"},{word:"weekend",icon:"sun",meaning:"週末"}],questions:[{passage:"On Monday, I go to school and study English. On Wednesday, I swim with my classmates after class.",q:"What does the child do on Wednesday?",opts:["Swim with classmates", "Go to the library", "Visit grandmother", "Eat dim sum"],correct:0,icon:"whale"},{passage:"Every Saturday morning, my family and I run in the park before breakfast.",q:"When does the family run in the park?",opts:["Saturday morning", "Sunday night", "Monday evening", "Friday afternoon"],correct:0,icon:"runner"},{passage:"On the weekend, my brother likes to jump on the trampoline while I read my storybooks.",q:"What does the brother like to do on weekends?",opts:["Jump on the trampoline", "Read storybooks", "Swim in the pool", "Write letters"],correct:0,icon:"jumper"},{passage:"My class has an English test every Friday. I always study hard on Thursday night.",q:"When does the child study hard?",opts:["Thursday night", "Friday morning", "Monday evening", "Sunday afternoon"],correct:0,icon:"watch_clock"},{passage:"Yesterday, I wrote a letter to my grandmother. Tomorrow, I will visit her with my family.",q:"What will the child do tomorrow?",opts:["Visit grandmother", "Write another letter", "Go swimming", "Play football"],correct:0,icon:"watch_clock"},{passage:"There are seven days in a week. My favourite day is Saturday because I can play all day.",q:"Why does the child like Saturday?",opts:["Can play all day", "Has to study", "Must go to school", "Feels tired"],correct:0,icon:"sun"},{passage:"After school on Tuesday, I read a new book about whales and fish in the sea.",q:"What is the new book about?",opts:["Whales and fish", "Dogs and cats", "Cars and trains", "Fruits and food"],correct:0,icon:"whale"}]},
-{id:"reading_u7",tier:7,stars:3,name:"閱讀第七關：短文推理 Story Inference (P2)",goal:5,time:110,preview:[{word:"because",icon:"happy",meaning:"因為"},{word:"suddenly",icon:"sad",meaning:"突然"},{word:"quickly",icon:"runner",meaning:"快速地"}],questions:[{passage:"Sam ran quickly to catch the minibus because he was late for school. He arrived just in time.",q:"Why did Sam run quickly?",opts:["He was late for school", "He wanted exercise", "He lost his bag", "He was playing a game"],correct:0,icon:"runner"},{passage:"The sky turned dark and it started to rain suddenly. Mia opened her umbrella quickly.",q:"What did Mia do when it rained?",opts:["Opened her umbrella", "Ran home crying", "Went swimming", "Ate an egg waffle"],correct:0,icon:"umbrella"},{passage:"Jack felt scared because the room was very dark. He turned on the light quickly and felt better.",q:"Why did Jack feel scared?",opts:["The room was dark", "He was hungry", "He lost his toy", "He was late"],correct:0,icon:"sad"},{passage:"Because it was very hot, my family bought cold milk tea and sat under a big tree.",q:"Why did the family buy cold milk tea?",opts:["It was very hot", "It was raining", "It was cold", "It was nighttime"],correct:0,icon:"milktea"},{passage:"Emma studied hard every night because she wanted to get a good grade in the English test.",q:"Why did Emma study hard?",opts:["To get a good grade", "To play games", "To watch TV", "To sleep early"],correct:0,icon:"book"},{passage:"The little chick suddenly ran to its mother when it heard a loud noise nearby.",q:"Why did the chick run to its mother?",opts:["It heard a loud noise", "It was hungry", "It wanted to swim", "It was sleepy"],correct:0,icon:"chick"},{passage:"Because the classroom was messy, the teacher asked all students to clean it up quickly.",q:"Why did the teacher ask students to clean up?",opts:["The classroom was messy", "It was time to eat", "It was raining", "It was a holiday"],correct:0,icon:"table"}]}
+{id:"reading_u7",tier:7,stars:3,name:"閱讀第七關：短文推理 Story Inference (P2)",goal:5,time:110,preview:[{word:"because",icon:"happy",meaning:"因為"},{word:"suddenly",icon:"sad",meaning:"突然"},{word:"quickly",icon:"runner",meaning:"快速地"}],questions:[{passage:"Sam ran quickly to catch the minibus because he was late for school. He arrived just in time.",q:"Why did Sam run quickly?",opts:["He was late for school", "He wanted exercise", "He lost his bag", "He was playing a game"],correct:0,icon:"runner"},{passage:"The sky turned dark and it started to rain suddenly. Mia opened her umbrella quickly.",q:"What did Mia do when it rained?",opts:["Opened her umbrella", "Ran home crying", "Went swimming", "Ate an egg waffle"],correct:0,icon:"umbrella"},{passage:"Jack felt scared because the room was very dark. He turned on the light quickly and felt better.",q:"Why did Jack feel scared?",opts:["The room was dark", "He was hungry", "He lost his toy", "He was late"],correct:0,icon:"sad"},{passage:"Because it was very hot, my family bought cold milk tea and sat under a big tree.",q:"Why did the family buy cold milk tea?",opts:["It was very hot", "It was raining", "It was cold", "It was nighttime"],correct:0,icon:"milktea"},{passage:"Emma studied hard every night because she wanted to get a good grade in the English test.",q:"Why did Emma study hard?",opts:["To get a good grade", "To play games", "To watch TV", "To sleep early"],correct:0,icon:"book"},{passage:"The little chick suddenly ran to its mother when it heard a loud noise nearby.",q:"Why did the chick run to its mother?",opts:["It heard a loud noise", "It was hungry", "It wanted to swim", "It was sleepy"],correct:0,icon:"chick"},{passage:"Because the classroom was messy, the teacher asked all students to clean it up quickly.",q:"Why did the teacher ask students to clean up?",opts:["The classroom was messy", "It was time to eat", "It was raining", "It was a holiday"],correct:0,icon:"table"}]},
+{id:"reading_u8",tier:8,stars:2,name:"閱讀第八關：因果關係 Cause & Effect (P3)",goal:4,time:90,preview:[{word:"because",icon:"book",meaning:"因為"},{word:"so",icon:"happy",meaning:"所以"},{word:"rained",icon:"rain",meaning:"下雨了"},{word:"cancelled",icon:"sad",meaning:"取消"}],questions:[{passage:"Amy woke up late because her alarm clock did not ring. She missed the school bus, so her mother drove her to school. Amy was worried, but she arrived just in time for the first lesson.",q:"Amy因為咩事遲咗起身？",opts:["鬧鐘冇響","媽媽遲叫佢","巴士遲到","天氣不好"],correct:0,icon:"clock"},{passage:"Amy woke up late because her alarm clock did not ring. She missed the school bus, so her mother drove her to school. Amy was worried, but she arrived just in time for the first lesson.",q:"點解Amy要坐媽媽車去學校？",opts:["因為佗遲咗，錯過咗校巴","因為落雨","因為想同媽媽一齊","因為巴士壞咗"],correct:0,icon:"minibus"},{passage:"It rained heavily all morning, so the sports day was cancelled. The students were disappointed because they had trained hard for the races. The teacher said the sports day would be held next week instead.",q:"點解運動會被取消？",opts:["因為落大雨","因為老師病咗","因為冇足夠學生","因為場地維修"],correct:0,icon:"rain"},{passage:"It rained heavily all morning, so the sports day was cancelled. The students were disappointed because they had trained hard for the races. The teacher said the sports day would be held next week instead.",q:"學生點解會失望？",opts:["因為佗哋練習咗好耐但冇得比賽","因為老師唔嚟","因為冇早餐食","因為天氣熱"],correct:0,icon:"sad"},{passage:"Tom did not study for his spelling test because he watched too much TV. As a result, he got a low score. His mother told him to spend less time watching TV and more time studying.",q:"點解Tom測驗分數低？",opts:["因為佗睇太多電視冇溫書","因為題目太難","因為佗病咗","因為老師改錯"],correct:0,icon:"sad"},{passage:"Tom did not study for his spelling test because he watched too much TV. As a result, he got a low score. His mother told him to spend less time watching TV and more time studying.",q:"媽媽建議Tom做咩？",opts:["減少睇電視，多啲溫書","買多啲玩具","轉學校","唔用功都得"],correct:0,icon:"book"},{passage:"The plants in the garden grew very well because Grandpa watered them every day and gave them enough sunlight. The flowers bloomed beautifully, and the whole family enjoyed the garden very much.",q:"點解花園嘅植物生得好？",opts:["因為爺爺每日淋水並提供充足陽光","因為天氣凍","因為冇人理","因為用咗化學肥料"],correct:0,icon:"happy"},{passage:"The plants in the garden grew very well because Grandpa watered them every day and gave them enough sunlight. The flowers bloomed beautifully, and the whole family enjoyed the garden very much.",q:"結果點呢？",opts:["花開得好靚，全家都好開心","花全部枯咗","冇人理個花園","爺爺唔再種花"],correct:0,icon:"happy"}]}
 ];
-const CATEGORY_META = {
-  phonics: {name:"拼音礦洞 Phonics Rush", cls:"phonics", units:PHONICS_UNITS, icon:"cat", desc:"訓練英文拼讀規則，由小一首尾音到小二連音、雙字母音及默音e"},
-  vocab: {name:"生活詞彙礦洞 Vocab Blitz", cls:"vocab", units:VOCAB_UNITS, icon:"schoolbag", desc:"由小一生活場景詞彙進階至小二情緒、動作、日期詞彙"},
-  reading: {name:"閱讀礦洞 Reading Quest", cls:"reading", units:READING_UNITS, icon:"book", desc:"由簡單句子理解進階至小二因果推理短文"}
-};
+
+const PHONICS_SKILL_MAP = {phonics_u1:"initial_sounds",phonics_u2:"final_sounds",phonics_u3:"middle_sounds",phonics_u4:"rhyming",phonics_u5:"blends",phonics_u6:"digraphs",phonics_u7:"silent_e",phonics_u8:"vowel_teams",phonics_u9:"r_controlled",phonics_u10:"multisyllable"};
+
 const PHONICS_LESSONS = {
-initial_sounds:{title:"首音 Initial Sounds",rule:"每個英文單字開首的第一個音，稱為「首音」。留心聽單字最開始發出的聲音，就可以配對相同首音的字。",tip:"小貼士：讀出單字時，特別強調第一個字母的音，例如 /k/-at (Cat)。",examples:[{word:"Cat",icon:"cat",note:"貓",chunks:["c","at"],speakChunks:["kuh","at"]},{word:"Dog",icon:"dog",note:"狗",chunks:["d","og"],speakChunks:["duh","og"]},{word:"Bee",icon:"bee",note:"蜜蜂",chunks:["b","ee"],speakChunks:["buh","ee"]},{word:"Ball",icon:"ball",note:"球",chunks:["b","all"],speakChunks:["buh","all"]},{word:"Sun",icon:"sun",note:"太陽",chunks:["s","un"],speakChunks:["sss","un"]}]},
-final_sounds:{title:"尾音 Final Sounds",rule:"單字最後發出的聲音稱為「尾音」。即使中間字母不同，只要尾音相同就可以配對。",tip:"小貼士：讀單字時放慢速度，留意最後一個音節，例如 Cat /k-æ-t/ 尾音是 /t/。",examples:[{word:"Hat",icon:"familyhouse",note:"帽",chunks:["ha","t"],speakChunks:["ha","tuh"]},{word:"Cat",icon:"cat",note:"貓",chunks:["ca","t"],speakChunks:["ca","tuh"]},{word:"Bird",icon:"bird",note:"鳥",chunks:["bir","d"],speakChunks:["bir","duh"]},{word:"Cup",icon:"cheese",note:"杯",chunks:["cu","p"],speakChunks:["cu","puh"]},{word:"Dog",icon:"dog",note:"狗",chunks:["do","g"],speakChunks:["do","guh"]}]},
-middle_sounds:{title:"中間音 Middle Sounds",rule:"單字中間的母音（a, e, i, o, u）決定咗單字嘅讀音。掌握中間音可以幫助拼讀新單字。",tip:"小貼士：CVC結構（子音-母音-子音）如 Cat, Dog, Sun 是最基本嘅拼讀練習。",examples:[{word:"Cat",icon:"cat",note:"貓",chunks:["c","a","t"],speakChunks:["kuh","aa","tuh"]},{word:"Dog",icon:"dog",note:"狗",chunks:["d","o","g"],speakChunks:["duh","ah","guh"]},{word:"Sun",icon:"sun",note:"太陽",chunks:["s","u","n"],speakChunks:["sss","uh","nuh"]},{word:"Pin",icon:"pencilcase",note:"針",chunks:["p","i","n"],speakChunks:["puh","ih","nuh"]},{word:"Bag",icon:"schoolbag",note:"袋",chunks:["b","a","g"],speakChunks:["buh","aa","guh"]}]},
-rhyming:{title:"押韻 Rhyming",rule:"押韻是指兩個單字尾音相同但首音不同，例如 Cat 和 Hat。學會押韻有助提升拼讀能力及記憶單字。",tip:"小貼士：多讀童謠（nursery rhymes）可以訓練押韻感知能力。",examples:[{word:"Cat",icon:"cat",note:"貓",chunks:["c","at"],speakChunks:["kuh","at"]},{word:"Hat",icon:"familyhouse",note:"帽",chunks:["h","at"],speakChunks:["huh","at"]},{word:"Bird",icon:"bird",note:"鳥",chunks:["b","ird"],speakChunks:["buh","ird"]},{word:"Sun",icon:"sun",note:"太陽",chunks:["s","un"],speakChunks:["sss","un"]},{word:"Fun",icon:"happy",note:"開心",chunks:["f","un"],speakChunks:["fuh","un"]}]},
-blends:{title:"連音組合 Consonant Blends",rule:"連音組合是指兩個子音連在一起發音，例如 st, fr, pl, gr, cl。發音時兩個子音要連貫，唔可以分開讀。",tip:"小貼士：試下慢慢讀 s-t-op，然後加快速度變成 stop，感受連音嘅感覺。",examples:[{word:"Stop",icon:"runner",note:"停",chunks:["st","op"],speakChunks:["stuh","op"]},{word:"Frog",icon:"whale",note:"青蛙",chunks:["fr","og"],speakChunks:["fruh","og"]},{word:"Grass",icon:"cloud",note:"草",chunks:["gr","ass"],speakChunks:["gruh","ass"]},{word:"Clap",icon:"happy",note:"拍手",chunks:["cl","ap"],speakChunks:["kluh","ap"]},{word:"Bring",icon:"schoolbag",note:"帶來",chunks:["br","ing"],speakChunks:["bruh","ing"]}]},
-digraphs:{title:"雙字母音 Digraphs",rule:"雙字母音是指兩個字母組合發出一個全新嘅聲音，例如 sh, ch, th, wh, ph。呢兩個字母合埋讀一個音，唔係分開讀。",tip:"小貼士：sh讀 /ʃ/（安靜嘅聲音），ch讀 /tʃ/，th讀 /θ/，多練習可以分辨呢啲聲音。",examples:[{word:"Ship",icon:"ferry",note:"船",chunks:["sh","ip"],speakChunks:["shh","ip"]},{word:"Chair",icon:"chair",note:"椅子",chunks:["ch","air"],speakChunks:["chuh","air"]},{word:"Think",icon:"happy",note:"諗",chunks:["th","ink"],speakChunks:["thh","ink"]},{word:"Whale",icon:"whale",note:"鯨魚",chunks:["wh","ale"],speakChunks:["wuh","ale"]},{word:"Cheese",icon:"cheese",note:"芝士",chunks:["ch","eese"],speakChunks:["chuh","eese"]}]},
-silent_e:{title:"默音e Silent E (Magic E)",rule:"當單字尾巴有一個不發音嘅e，佐前面嘅母音會由短音變成長音，例如 Cap(短a) 變成 Cape(長a)。呢個e好似魔法一樣，改變咗前面母音嘅讀音。",tip:"小貼士：試下比較 Cap 同 Cape、Rid 同 Ride，感受默音e嘅魔力。",examples:[{word:"Cake",icon:"cheese",note:"蛋糕",chunks:["cak","e"],speakChunks:["cak","eh"]},{word:"Bike",icon:"runner",note:"單車",chunks:["bik","e"],speakChunks:["bik","eh"]},{word:"Home",icon:"familyhouse",note:"家",chunks:["hom","e"],speakChunks:["hom","eh"]},{word:"Rope",icon:"ruler",note:"繩",chunks:["rop","e"],speakChunks:["rop","eh"]},{word:"Nose",icon:"happy",note:"鼻子",chunks:["nos","e"],speakChunks:["nos","eh"]}]},
-vowel_teams:{title:"母音組合 Vowel Teams",rule:"兩個母音字母組合喺一起，發出一個新嘅聲音，例如 ai, oa, ee, ea, oo。呢兩個字母合埋讀一個長母音。",tip:"小貼士：ai讀長a音、oa讀長o音、ee讀長e音，多聽多讀就會熟悉。",examples:[{word:"Rain",icon:"rain",note:"雨",chunks:["r","ai","n"],speakChunks:["ruh","ai","nuh"]},{word:"Boat",icon:"boat",note:"船",chunks:["b","oa","t"],speakChunks:["buh","oa","tuh"]},{word:"Bee",icon:"bee",note:"蜜蜂",chunks:["b","ee"],speakChunks:["buh","ee"]},{word:"Cloud",icon:"cloud",note:"雲",chunks:["cl","ou","d"],speakChunks:["kluh","ou","duh"]},{word:"Moon",icon:"moon",note:"月亮",chunks:["m","oo","n"],speakChunks:["muh","oo","nuh"]}]},
-r_controlled:{title:"R控制母音 R-Controlled Vowels",rule:"當母音（a, e, i, o, u）後面跟住字母r時，母音嘅讀音會被r改變，形成新嘅聲音，例如 ar, er, ir, or, ur。",tip:"小貼士：ar讀 /ɑːr/、or讀 /ɔːr/、er/ir/ur都讀類似 /ɜːr/ 嘅聲音。",examples:[{word:"Car",icon:"taxi",note:"車",chunks:["c","ar"],speakChunks:["kuh","ar"]},{word:"Bird",icon:"bird",note:"鳥",chunks:["b","ir","d"],speakChunks:["buh","ir","duh"]},{word:"Corn",icon:"corn",note:"玉米",chunks:["c","or","n"],speakChunks:["kuh","or","nuh"]},{word:"Star",icon:"star",note:"星星",chunks:["st","ar"],speakChunks:["stuh","ar"]},{word:"Turtle",icon:"turtle",note:"烏龜",chunks:["t","ur","tle"],speakChunks:["tuh","ur","tle"]}]},
-multisyllable:{title:"多音節詞 Multi-Syllable Words",rule:"長單字通常由多個音節組成。學會將長單字拆成音節，逐個音節拼讀，就可以輕鬆讀出複雜嘅單字。",tip:"小貼士：拍手數音節係一個好方法，例如講 Rab-bit 時拍兩下手。",examples:[{word:"Rabbit",icon:"cow",note:"兔子",chunks:["rab","bit"],speakChunks:["rab","bit"]},{word:"Butterfly",icon:"bee",note:"蝴蝶",chunks:["but","ter","fly"],speakChunks:["but","ter","fly"]},{word:"Umbrella",icon:"umbrella",note:"雨傘",chunks:["um","brel","la"],speakChunks:["um","brel","la"]},{word:"Pencil",icon:"pencilcase",note:"筆",chunks:["pen","cil"],speakChunks:["pen","cil"]},{word:"Table",icon:"table",note:"桌子",chunks:["ta","ble"],speakChunks:["ta","ble"]}]}
+initial_sounds:{title:"首音 Initial Sounds",rule:"每個英文單字開首的第一個音，稱為「首音」。留心聽單字最開始發出的聲音，就可以配對相同首音的字。",tip:"小貼士：讀出單字時，特別強調第一個字母的音，例如 /k/-at (Cat)。",examples:[{word:"Cat",icon:"cat",note:"貓",chunks:["c","at"],speakChunks:["kuh","at"]},{word:"Dog",icon:"dog",note:"狗",chunks:["d","og"],speakChunks:["duh","og"]},{word:"Ball",icon:"ball",note:"球",chunks:["b","all"],speakChunks:["buh","all"]},{word:"Sun",icon:"sun",note:"太陽",chunks:["s","un"],speakChunks:["sss","un"]},{word:"Book",icon:"book",note:"書",chunks:["b","ook"],speakChunks:["buh","ook"]}]},
+final_sounds:{title:"尾音 Final Sounds",rule:"每個英文單字結尾的最後一個音，稱為「尾音」。聽清楚單字最後嗰個聲音，就可以配對相同尾音嘅字。",tip:"小貼士：讀完單字後停一停，特別留意最後嗰個音，例如 Cat 嘅 /t/ 尾音。",examples:[{word:"Cat",icon:"cat",note:"貓",chunks:["ca","t"],speakChunks:["ca","tuh"]},{word:"Dog",icon:"dog",note:"狗",chunks:["do","g"],speakChunks:["do","guh"]},{word:"Sun",icon:"sun",note:"太陽",chunks:["su","n"],speakChunks:["su","nuh"]},{word:"Ball",icon:"ball",note:"球",chunks:["ba","ll"],speakChunks:["ba","ll"]},{word:"Map",icon:"apple",note:"地圖",chunks:["ma","p"],speakChunks:["ma","puh"]}]},
+middle_sounds:{title:"中間音 Middle Sounds",rule:"單字中間嘅母音，決定咗成個字嘅讀音。分辨清楚a, e, i, o, u呢五個母音嘅發音，就可以掌握拼讀技巧。",tip:"小貼士：慢慢讀出每個字母嘅音，例如 c-a-t，特別注意中間嘅母音。",examples:[{word:"Cat",icon:"cat",note:"貓",chunks:["c","a","t"],speakChunks:["kuh","aa","tuh"]},{word:"Dog",icon:"dog",note:"狗",chunks:["d","o","g"],speakChunks:["duh","ah","guh"]},{word:"Sun",icon:"sun",note:"太陽",chunks:["s","u","n"],speakChunks:["sss","uh","nuh"]},{word:"Pen",icon:"apple",note:"筆",chunks:["p","e","n"],speakChunks:["puh","eh","nuh"]},{word:"Big",icon:"ball",note:"大",chunks:["b","i","g"],speakChunks:["buh","ih","guh"]}]},
+rhyming:{title:"押韻 Rhyming Words",rule:"押韻嘅字有相同嘅尾音組合（韻母）。例如 Cat 同 Hat 都係 -at 結尾，讀音相似。",tip:"小貼士：搵出單字入面母音開始到結尾嘅部分，就係「韻母」，韻母一樣就會押韻。",examples:[{word:"Cat",icon:"cat",note:"貓",chunks:["c","at"],speakChunks:["kuh","at"]},{word:"Hat",icon:"apple",note:"帽",chunks:["h","at"],speakChunks:["huh","at"]},{word:"Sun",icon:"sun",note:"太陽",chunks:["s","un"],speakChunks:["sss","un"]},{word:"Fun",icon:"happy",note:"開心",chunks:["f","un"],speakChunks:["fuh","un"]},{word:"Dog",icon:"dog",note:"狗",chunks:["d","og"],speakChunks:["duh","og"]}]},
+blends:{title:"連音組合 Consonant Blends",rule:"兩個或以上嘅輔音字母連在一起，混合發出一個聲音，例如 st, fr, cl。",tip:"小貼士：練習連音時，將兩個輔音連貫咁讀出，唔好分開讀。",examples:[{word:"Stop",icon:"runner",note:"停",chunks:["st","op"],speakChunks:["stuh","op"]},{word:"Frog",icon:"apple",note:"青蛙",chunks:["fr","og"],speakChunks:["fruh","og"]},{word:"Clock",icon:"clock",note:"時鐘",chunks:["cl","ock"],speakChunks:["kluh","ock"]},{word:"Grass",icon:"apple",note:"草",chunks:["gr","ass"],speakChunks:["gruh","ass"]},{word:"Bring",icon:"schoolbag",note:"帶來",chunks:["br","ing"],speakChunks:["bruh","ing"]}]},
+digraphs:{title:"雙字母音 Digraphs",rule:"兩個字母組合發出一個新嘅聲音，例如 sh, ch, th, wh。",tip:"小貼士：呢啲組合唔可以逐個字母讀，要當成一個新嘅音去讀。",examples:[{word:"Ship",icon:"ferry",note:"船",chunks:["sh","ip"],speakChunks:["shh","ip"]},{word:"Chair",icon:"chair",note:"椅子",chunks:["ch","air"],speakChunks:["chuh","air"]},{word:"Think",icon:"book",note:"諗",chunks:["th","ink"],speakChunks:["thh","ink"]},{word:"Whale",icon:"whale",note:"鯨魚",chunks:["wh","ale"],speakChunks:["wuh","ale"]},{word:"Cheese",icon:"cheese",note:"芝士",chunks:["ch","eese"],speakChunks:["chuh","eese"]}]},
+silent_e:{title:"默音e Silent E",rule:"單字最後嘅e唔發音，但會令前面嘅母音變成長音，例如 Cap變成Cape。",tip:"小貼士：見到單字結尾有e，就要諗吓中間嘅母音會唔會變成長音。",examples:[{word:"Cake",icon:"apple",note:"蛋糕",chunks:["cak","e"],speakChunks:["cak","eh"]},{word:"Bike",icon:"apple",note:"單車",chunks:["bik","e"],speakChunks:["bik","eh"]},{word:"Home",icon:"familyhouse",note:"家",chunks:["hom","e"],speakChunks:["hom","eh"]},{word:"Rope",icon:"ruler",note:"繩",chunks:["rop","e"],speakChunks:["rop","eh"]},{word:"Nose",icon:"happy",note:"鼻子",chunks:["nos","e"],speakChunks:["nos","eh"]}]},
+vowel_teams:{title:"母音組合 Vowel Teams",rule:"兩個母音字母組合發出一個音，例如 ai, oa, ee, oo。",tip:"小貼士：見到兩個母音連在一齊，通常只會發一個音，唔會分開讀。",examples:[{word:"Rain",icon:"rain",note:"雨",chunks:["r","ai","n"],speakChunks:["ruh","ai","nuh"]},{word:"Boat",icon:"ferry",note:"船",chunks:["b","oa","t"],speakChunks:["buh","oa","tuh"]},{word:"Moon",icon:"moon",note:"月亮",chunks:["m","oo","n"],speakChunks:["muh","oo","nuh"]},{word:"Cloud",icon:"cloud",note:"雲",chunks:["cl","ou","d"],speakChunks:["kluh","ou","duh"]},{word:"Tree",icon:"apple",note:"樹",chunks:["tr","ee"],speakChunks:["tr","ee"]}]},
+r_controlled:{title:"R控制母音 R-Controlled Vowels",rule:"母音後面加R，會改變母音嘅讀音，例如 ar, ir, or, ur, er。",tip:"小貼士：見到母音同R連在一齊，讀音會唔同於單獨嘅母音。",examples:[{word:"Star",icon:"star",note:"星星",chunks:["st","ar"],speakChunks:["stuh","ar"]},{word:"Bird",icon:"bird",note:"鳥",chunks:["b","ir","d"],speakChunks:["buh","ir","duh"]},{word:"Chair",icon:"chair",note:"椅子",chunks:["ch","air"],speakChunks:["chuh","air"]},{word:"Corn",icon:"apple",note:"玉米",chunks:["c","or","n"],speakChunks:["kuh","or","nuh"]},{word:"Runner",icon:"runner",note:"跑步者",chunks:["r","u","nn","er"],speakChunks:["ruh","uh","nn","er"]}]},
+multisyllable:{title:"多音節詞 Multi-Syllable Words",rule:"長單字通常由多個音節組成。學會將長單字拆成音節，逐個音節拼讀，就可以輕鬆讀出複雜嘅單字。",tip:"小貼士：拍手數音節係一個好方法，一個音節拍一下手。",examples:[{word:"Rabbit",icon:"cat",note:"兔子",chunks:["rab","bit"],speakChunks:["rab","bit"]},{word:"Umbrella",icon:"umbrella",note:"雨傘",chunks:["um","brel","la"],speakChunks:["um","brel","la"]},{word:"Pencilcase",icon:"pencilcase",note:"筆盒",chunks:["pen","cil","case"],speakChunks:["pen","cil","case"]},{word:"Teacher",icon:"teacher",note:"老師",chunks:["tea","cher"],speakChunks:["tea","cher"]},{word:"Classmates",icon:"classmates",note:"同學",chunks:["class","mates"],speakChunks:["class","mates"]}]}
 };
 
-
-const PHONICS_SKILL_MAP = {
-  phonics_u1:"initial_sounds", phonics_u2:"final_sounds", phonics_u3:"middle_sounds",
-  phonics_u4:"rhyming", phonics_u5:"blends", phonics_u6:"digraphs", phonics_u7:"silent_e",
-  phonics_u8:"vowel_teams", phonics_u9:"r_controlled", phonics_u10:"multisyllable"
+const CATEGORY_META = {
+  phonics: {name:"拼音礦洞 Phonics Rush", cls:"phonics", units:PHONICS_UNITS, icon:"cat", desc:"訓練英文拼讀規則，由小一首尾音到小二母音組合、R控制母音及多音節詞"},
+  vocab: {name:"生活詞彙礦洞 Vocab Blitz", cls:"vocab", units:VOCAB_UNITS, icon:"schoolbag", desc:"由小一生活場景詞彙進階至小三社區、職業、環境等主題詞彙"},
+  reading: {name:"閱讀礦洞 Reading Quest", cls:"reading", units:READING_UNITS, icon:"book", desc:"由小一簡單句子理解進階至小三因果關係短文閱讀"}
 };
-
-
 
 let state = null;
 let currentCategory = null;
@@ -503,10 +521,8 @@ function startGame(){
 }
 
 const LEVEL_TITLES = [
-  {min:0, title:"見習礦工"}, {min:870, title:"初級冒險家"}, {min:2143, title:"拼音學徒"},
-  {min:3630, title:"詞彙探索者"}, {min:5276, title:"閱讀勇士"}, {min:7051, title:"英語建築師"},
-  {min:8937, title:"礦洞探險家"}, {min:10920, title:"礦洞大師"}, {min:12991, title:"英語王者"},
-  {min:15140, title:"傳說級語言大師"},
+  {min:0, title:"見習礦工"}, {min:1377, title:"初級冒險家"}, {min:3391, title:"拼音學徒"}, {min:5744, title:"詞彙探索者"}, {min:8349, title:"閱讀勇士"}, {min:11159, title:"英語建築師"},
+  {min:14143, title:"礦洞探險家"}, {min:17281, title:"礦洞大師"}, {min:20557, title:"英語王者"}, {min:23959, title:"P3知識先鋒"}, {min:27476, title:"傳說級語言大師"}, {min:31100, title:"小學英語宗師"}
 ];
 function calcLevel(xp){
   let level=1, title=LEVEL_TITLES[0].title, currentMin=0, nextMin=100;
@@ -564,6 +580,11 @@ function enterCategory(catKey){
   showScreen('screen-units');
 }
 
+
+let soundBuilderQueue = [];
+let sbIdx = 0;
+let sbBuiltChunks = [];
+
 function goToUnit(catKey, unit){
   const up = state.progress[catKey][unit.id];
   if(catKey === 'phonics' && !up.completed && PHONICS_LESSONS[PHONICS_SKILL_MAP[unit.id]]){
@@ -571,6 +592,113 @@ function goToUnit(catKey, unit){
   } else {
     enterUnitPreview(unit);
   }
+}
+
+function enterLesson(unit){
+  currentUnit = unit;
+  const skillKey = PHONICS_SKILL_MAP[unit.id];
+  const lesson = PHONICS_LESSONS[skillKey];
+  if(!lesson || isRetest){ enterUnitPreview(unit); return; }
+  document.getElementById('lesson-title').innerText = lesson.title;
+  document.getElementById('lesson-rule').innerText = lesson.rule;
+  const exWrap = document.getElementById('lesson-examples');
+  exWrap.innerHTML = '';
+  lesson.examples.forEach(e=>{
+    const card = document.createElement('div');
+    card.className = 'preview-word-card';
+    card.innerHTML = `<div class="icon-wrap">${renderIcon(ICONS[e.icon])}</div><div class="en">${e.word}</div><div class="zh">${e.note||''}</div>`;
+    exWrap.appendChild(card);
+  });
+  showScreen('screen-lesson');
+}
+
+function enterSoundBuilder(unit){
+  currentUnit = unit;
+  const skillKey = PHONICS_SKILL_MAP[unit.id];
+  const lesson = PHONICS_LESSONS[skillKey];
+  if(!lesson || isRetest){ enterUnitPreview(unit); return; }
+  soundBuilderQueue = lesson.examples;
+  sbIdx = 0;
+  renderSoundBuilder();
+  showScreen('screen-soundbuilder');
+}
+
+function renderSoundBuilder(){
+  const ex = soundBuilderQueue[sbIdx];
+  sbBuiltChunks = [];
+  document.getElementById('sb-icon').innerHTML = renderIcon(ICONS[ex.icon]);
+  document.getElementById('sb-built-word').innerText = ex.chunks.map(()=>'_').join(' ');
+  document.getElementById('sb-feedback').innerText = '';
+  document.getElementById('sb-next-btn').style.display = 'none';
+  document.getElementById('sb-progress').innerText = (sbIdx+1) + ' / ' + soundBuilderQueue.length;
+  const shuffled = shuffleArray(ex.chunks.map((c,i)=>({text:c, order:i, speakText: (ex.speakChunks && ex.speakChunks[i]) || c})));
+  const grid = document.getElementById('sb-chunk-grid');
+  grid.innerHTML = '';
+  shuffled.forEach(chunkObj=>{
+    const b = document.createElement('div');
+    b.className = 'option-block';
+    b.innerText = chunkObj.text;
+    b.onclick = () => pickChunk(chunkObj, b);
+    grid.appendChild(b);
+  });
+}
+
+function pickChunk(chunkObj, el){
+  const ex = soundBuilderQueue[sbIdx];
+  const expectedOrder = sbBuiltChunks.length;
+  speakPhoneticChunk(chunkObj.speakText || chunkObj.text);
+  if(chunkObj.order === expectedOrder){
+    sbBuiltChunks.push(chunkObj.text);
+    el.classList.add('correct');
+    el.onclick = null;
+    const display = ex.chunks.map((c,i)=> i < sbBuiltChunks.length ? sbBuiltChunks[i] : '_').join(' ');
+    document.getElementById('sb-built-word').innerText = display;
+    if(sbBuiltChunks.length === ex.chunks.length){
+      document.getElementById('sb-feedback').innerText = '🎉 砌好啦！' + ex.word;
+      playTone(880, 0.2);
+      setTimeout(()=> speakEnglishWord(ex.word), 300);
+      document.getElementById('sb-next-btn').style.display = 'inline-block';
+      document.getElementById('sb-next-btn').innerText = (sbIdx + 1 < soundBuilderQueue.length) ? '➡️ 下一個字' : '🎯 開始正式挑戰';
+    }
+  } else {
+    el.classList.add('wrong');
+    playTone(220, 0.15);
+    setTimeout(()=> el.classList.remove('wrong'), 500);
+  }
+}
+
+function nextSoundBuilder(){
+  sbIdx++;
+  if(sbIdx < soundBuilderQueue.length){
+    renderSoundBuilder();
+  } else {
+    enterUnitPreview(currentUnit);
+  }
+}
+
+function speakEnglishWord(word){
+  if(!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const voices = window.speechSynthesis.getVoices();
+  const enVoice = voices.find(v => v.lang === 'en-US') || voices.find(v => v.lang && v.lang.startsWith('en'));
+  const utter = new SpeechSynthesisUtterance(word);
+  utter.lang = 'en-US';
+  utter.rate = 0.85;
+  if(enVoice) utter.voice = enVoice;
+  window.speechSynthesis.speak(utter);
+}
+
+function speakPhoneticChunk(text){
+  if(!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const voices = window.speechSynthesis.getVoices();
+  const enVoice = voices.find(v => v.lang === 'en-US') || voices.find(v => v.lang && v.lang.startsWith('en'));
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'en-US';
+  utter.rate = 0.6;
+  utter.pitch = 1.0;
+  if(enVoice) utter.voice = enVoice;
+  window.speechSynthesis.speak(utter);
 }
 
 function renderUnitGrid(){
@@ -587,12 +715,7 @@ function renderUnitGrid(){
       <div><b>${statusIcon} ${u.name}</b><br>
       <small class="stars">${'⭐'.repeat(u.stars)}</small>
       <small> · 目標答對 ${u.goal} 題 · 限時 ${u.time}s${up.completed ? ' · 最佳 '+up.bestScore+'題' : ''}</small></div>`;
-    if(up.unlocked){
-      div.onclick = () => {
-        isRetest = false;
-        goToUnit(currentCategory, u);
-      };
-    }
+    if(up.unlocked){ div.onclick = () => { isRetest = false; goToUnit(currentCategory, u); }; }
     grid.appendChild(div);
   });
 }
@@ -816,7 +939,7 @@ function answer(i, el){
   if(timeLeft <= 0) return;
   sessionAttempts++;
   const correct = i === currentQ.correct;
-  document.querySelectorAll('#options-grid .option-block').forEach((b,idx)=>{
+  document.querySelectorAll('.option-block').forEach((b,idx)=>{
     if(idx === currentQ.correct) b.classList.add('correct');
     if(idx === i && !correct) b.classList.add('wrong');
   });
@@ -1216,119 +1339,6 @@ function resetProgress(){
   }
 }
 
-function enterLesson(unit){
-  currentUnit = unit;
-  const skillKey = PHONICS_SKILL_MAP[unit.id];
-  const lesson = PHONICS_LESSONS[skillKey];
-  if(!lesson || isRetest){ enterUnitPreview(unit); return; }
-  document.getElementById('lesson-title').innerText = lesson.title;
-  document.getElementById('lesson-rule').innerText = lesson.rule;
-  const exWrap = document.getElementById('lesson-examples');
-  exWrap.innerHTML = '';
-  lesson.examples.forEach(e=>{
-    const card = document.createElement('div');
-    card.className = 'preview-word-card';
-    card.innerHTML = `<div class="icon-wrap">${renderIcon(ICONS[e.icon])}</div><div class="en">${e.word}</div><div class="zh">${e.note||''}</div>`;
-    card.onclick = () => speakEnglishWord(e.word);
-    exWrap.appendChild(card);
-  });
-  showScreen('screen-lesson');
-}
-
-let soundBuilderQueue = [];
-let sbIdx = 0;
-let sbBuiltChunks = [];
-
-function enterSoundBuilder(unit){
-  currentUnit = unit;
-  const skillKey = PHONICS_SKILL_MAP[unit.id];
-  const lesson = PHONICS_LESSONS[skillKey];
-  if(!lesson || isRetest){ enterUnitPreview(unit); return; }
-  soundBuilderQueue = lesson.examples;
-  sbIdx = 0;
-  document.getElementById('sb-instruction').innerText = lesson.tip || '按順序撳出拼音組件，聽下每個音，再組成完整單字！';
-  showScreen('screen-soundbuilder');
-  renderSoundBuilder();
-}
-
-function renderSoundBuilder(){
-  const ex = soundBuilderQueue[sbIdx];
-  sbBuiltChunks = [];
-  document.getElementById('sb-icon').innerHTML = renderIcon(ICONS[ex.icon]);
-  document.getElementById('sb-built-word').innerText = ex.chunks.map(()=>'_').join(' ');
-  document.getElementById('sb-feedback').innerText = '';
-  document.getElementById('sb-next-btn').style.display = 'none';
-  const shuffled = shuffleArray(ex.chunks.map((c,i)=>({text:c, order:i, speakText: (ex.speakChunks && ex.speakChunks[i]) || c})));
-  const grid = document.getElementById('sb-chunk-grid');
-  grid.innerHTML = '';
-  shuffled.forEach(chunkObj=>{
-    const b = document.createElement('div');
-    b.className = 'option-block';
-    b.innerText = chunkObj.text;
-    b.onclick = () => pickChunk(chunkObj, b);
-    grid.appendChild(b);
-  });
-}
-
-function pickChunk(chunkObj, el){
-  const ex = soundBuilderQueue[sbIdx];
-  const expectedOrder = sbBuiltChunks.length;
-  speakPhoneticChunk(chunkObj.speakText || chunkObj.text);
-  if(chunkObj.order === expectedOrder){
-    sbBuiltChunks.push(chunkObj.text);
-    el.classList.add('correct');
-    el.onclick = null;
-    const display = ex.chunks.map((c,i)=> i < sbBuiltChunks.length ? sbBuiltChunks[i] : '_').join(' ');
-    document.getElementById('sb-built-word').innerText = display;
-    if(sbBuiltChunks.length === ex.chunks.length){
-      document.getElementById('sb-feedback').innerText = '🎉 砌好啦！' + ex.word;
-      playTone(880, 0.2);
-      setTimeout(()=> speakEnglishWord(ex.word), 300);
-      document.getElementById('sb-next-btn').style.display = 'inline-block';
-      document.getElementById('sb-next-btn').innerText = (sbIdx + 1 < soundBuilderQueue.length) ? '➡️ 下一個字' : '🎯 去應用練習';
-    }
-  } else {
-    el.classList.add('wrong');
-    document.getElementById('sb-feedback').innerText = '❌ 次序未啱，再試下！';
-    playTone(220, 0.2);
-    setTimeout(()=> el.classList.remove('wrong'), 500);
-  }
-}
-
-function nextSoundBuilder(){
-  sbIdx++;
-  if(sbIdx < soundBuilderQueue.length){
-    renderSoundBuilder();
-  } else {
-    enterUnitPreview(currentUnit);
-  }
-}
-
-function speakEnglishWord(word){
-  if(!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const voices = window.speechSynthesis.getVoices();
-  const enVoice = voices.find(v => v.lang === 'en-US') || voices.find(v => v.lang && v.lang.startsWith('en'));
-  const utter = new SpeechSynthesisUtterance(word);
-  utter.lang = 'en-US';
-  utter.rate = 0.85;
-  if(enVoice) utter.voice = enVoice;
-  window.speechSynthesis.speak(utter);
-}
-
-function speakPhoneticChunk(text){
-  if(!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const voices = window.speechSynthesis.getVoices();
-  const enVoice = voices.find(v => v.lang === 'en-US') || voices.find(v => v.lang && v.lang.startsWith('en'));
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = 'en-US';
-  utter.rate = 0.6;
-  utter.pitch = 1.0;
-  if(enVoice) utter.voice = enVoice;
-  window.speechSynthesis.speak(utter);
-}
-
 function speakQuestion(){
   if(!currentQ) return;
   window.speechSynthesis.cancel();
@@ -1357,6 +1367,6 @@ window.onload = () => {
   if(existing){ document.getElementById('player-name').value = existing.name; }
 };
 
-</script>
+</script></script>
 </body>
 </html>
